@@ -1,0 +1,4 @@
+"hola mundo" 350.3 350 cadena " cadena "
+
+// Salida: cadena espacioEnBlanco numeroDecimal espacioEnBlanco numero 
+espacioEnBlanco id espacioEnBlanco cadena
