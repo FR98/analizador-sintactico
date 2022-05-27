@@ -403,8 +403,8 @@ class CompilerDef():
         self.has_lexical_errors()
 
         self.clean_tokens()
-        self.check_sintax()
-        self.has_sintax_errors()
+        # self.check_sintax()
+        # self.has_sintax_errors()
 
         self.get_definitions()
         self.has_sintax_errors()
@@ -523,7 +523,7 @@ class CompilerDef():
                 continue
             else:
                 self.tokens_clean.append(token)
-        
+
         for token in self.tokens_clean:
             Log.INFO(token)
 
@@ -578,7 +578,8 @@ class CompilerDef():
                         for token in definition_tokens[2::]:
                             if token.type == 'ident':
                                 if token.value == 'CHR':
-                                    value += chr(int(definition_tokens[definition_tokens.index(token) + 2].value))
+                                    if int(definition_tokens[definition_tokens.index(token) + 2].value) not in [10, 13]:
+                                        value += chr(int(definition_tokens[definition_tokens.index(token) + 2].value))
                                 else:
                                     value += self.CHARACTERS[token.value]
                             elif token.type == 'string':
@@ -645,6 +646,38 @@ class CompilerDef():
                                 value.append(token)
 
                         self.TOKENS_RE[definition_tokens[0].value] = value
+
+                elif token.value == 'PRODUCTIONS' and self.tokens_clean[token_index + 1].type != 'final':
+                    count = 0
+                    production_definition_tokens = []
+                    production_section_definitions = []
+                    while True:
+                        temp_token = self.tokens_clean[token_index + count + 1]
+
+                        if temp_token.type == 'final':
+                            production_section_definitions.append(production_definition_tokens)
+                            production_definition_tokens = []
+                        else:
+                            production_definition_tokens.append(temp_token)
+                        count += 1
+
+                        if temp_token.value in ['PRODUCTIONS', 'END']:
+                            token_index -= count
+                            break
+                    token_index += count
+
+                    for definition_tokens in production_section_definitions:
+                        value = []
+                        for token in definition_tokens[2::]:
+                            if token.type == 'ident':
+                                if token.value not in ['EXCEPT', 'KEYWORDS']:
+                                    value.append(token)
+                            elif token.type == 'string':
+                                value.append(token)
+                            elif token.type in ['iteration', 'option', 'group', 'or']:
+                                value.append(token)
+                        self.PRODUCTIONS[definition_tokens[0].value] = value
+
             token_index += 1
 
         self.CHARACTERS = self.parse_CHARACTERS(self.CHARACTERS)
@@ -652,6 +685,8 @@ class CompilerDef():
 
         self.TOKENS_RE = self.parse_TOKENS_RE(self.TOKENS_RE)
         self.TOKENS_RE['space'] = ' '
+
+        self.PRODUCTIONS = self.parse_PRODUCTIONS(self.PRODUCTIONS)
 
     def check_sintax(self):
         # Analizar flujo de tokens
@@ -788,6 +823,33 @@ class CompilerDef():
             TOKENS_RE[key] = self.changeExp(value)
 
         return TOKENS_RE
+
+    def parse_PRODUCTIONS(self, PRODUCTIONS):
+        options = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+        for key, val in PRODUCTIONS.items():
+            value = ''
+            for token in val:
+                # value += token.value
+                if token.value in self.symbols:
+                    value += self.symbols[token.value]
+                else:
+                    if token.type in ['iteration', 'option', 'group', 'or']:
+                        value += token.value
+                    else:
+                        # TODO: Add support for strings
+                        for o in options:
+                            if o not in list(self.symbols.values()):
+                                self.symbols[token.value] = o
+                                value += o
+                                self.CHARACTERS[o] = token.value.replace('"', '')
+                                break
+                        # value += token.value
+                        print(token)
+
+            PRODUCTIONS[key] = self.changeExp(value)
+
+        return PRODUCTIONS
 
     def changeExp(self, re):
         cont = 0

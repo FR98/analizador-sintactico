@@ -73,11 +73,18 @@ class LexGenerator:
                 tokens_re_to_replace += f"    '{key}': '{value}',\n"
             tokens_re_to_replace += '}'
 
+            productions_to_replace = ''
+            productions_to_replace += 'PRODUCTIONS = {\n'
+            for key, value in self.compiler_def.PRODUCTIONS.items():
+                productions_to_replace += f"    '{key}': '{value}',\n"
+            productions_to_replace += '}'
+
             with open('lex-analyzer.py', 'r') as file:
                 data = file.read().replace('{{COMPILER_NAME}}', self.compiler_def.COMPILER_NAME)
                 data = data.replace('{{CHARACTERS}}', characters_to_replace)
                 data = data.replace('{{KEYWORDS}}', keywords_to_replace)
                 data = data.replace('{{TOKENS_RE}}', tokens_re_to_replace)
+                data = data.replace('{{PRODUCTIONS}}', productions_to_replace)
 
             with open('lex-analyzer.py', 'w') as file:
                 file.write(data)
