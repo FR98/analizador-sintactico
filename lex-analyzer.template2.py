@@ -52,35 +52,32 @@ class Token():
 
 def eval_line(entry_file_lines, line, line_index):
     analyzed_lines = 1
-    line_position = 0
+    line_position_init = 0
     current_line_recognized_tokens = []
-    while line_position < len(line):
+    while line_position_init < len(line):
         current_token = None
-        next_token = None
-        avance = 0
+        avance = len(line)
         continuar = True
+
         while continuar:
-            if current_token and next_token:
-                if current_token.type != 'ERROR' and next_token.type == 'ERROR':
-                    avance -= 1
+
+            if current_token:
+                if current_token.type != 'ERROR':
+                    avance += 1
                     continuar = False
                     break
 
-            if line_position + avance > len(line):
+            if line_position_init == len(line):
                 continuar = False
                 break
 
-            if line_position + avance <= len(line):
-                current_token = Token(line[line_position:line_position + avance], line_index, line_position)
+            current_token = Token(line[line_position_init:avance], line_index, line_position_init)
 
-            avance += 1
+            avance -= 1
 
-            if line_position + avance <= len(line):
-                next_token = Token(line[line_position:line_position + avance], line_index, line_position)
+            Log.WARNING(current_token)
 
-            # Log.WARNING(current_token)
-
-        line_position = line_position + avance
+        line_position_init = avance
 
 
         if current_token and current_token.type != 'ERROR':
@@ -88,14 +85,14 @@ def eval_line(entry_file_lines, line, line_index):
             TOKENS.append(current_token)
             current_line_recognized_tokens.append(current_token)
         else:
-            Log.FAIL(current_token)
+            # Log.FAIL(current_token)
 
-            if line_position == len(line) + 1 and len(current_line_recognized_tokens) != 0:
+            if line_position_init == len(line) + 1 and len(current_line_recognized_tokens) != 0:
                 TOKENS.append(current_token)
 
             # Si se llega al final de la linea y no se reconoce ningun token,
             # se agrega la siguiente linea y se vuelve a intentar.
-            if line_position == len(line) + 1 and len(current_line_recognized_tokens) == 0:
+            if line_position_init == len(line) + 1 and len(current_line_recognized_tokens) == 0:
                 if line_index < len(entry_file_lines) - 1:
                     new_line = line + ' ' + entry_file_lines[line_index + 1].replace('\n', '\\n')
                     line_index += 1
@@ -125,22 +122,14 @@ def run():
         analyzed_lines = eval_line(entry_file_lines, line, line_index)
         line_index += analyzed_lines
 
-    Log.OKGREEN('\n\nTokens found:')
-    for token in TOKENS:
-        if token.type == 'ERROR':
-            Log.WARNING(token)
-        else:
-            Log.INFO(token)
-
-    # -------------------------------------------------------
-    # GET TOKENS
-    # -------------------------------------------------------
     lexical_errors = False
-    Log.OKBLUE('\n\nLexical errors:')
+    Log.OKGREEN('\n\nTokens found:')
     for token in TOKENS:
         if token.type == 'ERROR':
             Log.WARNING(f'Lexical error on line {token.line} column {token.column}: {token.value}')
             lexical_errors = True
+        else:
+            Log.INFO(token)
 
     if lexical_errors:
         Log.FAIL('\nLexical errors found on compiler definition file')
