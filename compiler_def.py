@@ -629,7 +629,7 @@ class CompilerDef():
                     if line[line_position:line_position + avance + 1] in ['(.', '<.']:
                         current_token = Token(line[line_position:line_position + avance + 1], line_index, line_position)
                     else:
-                        print(line[line_position:line_position + avance])
+                        # print(line[line_position:line_position + avance])
                         current_token = Token(line[line_position:line_position + avance], line_index, line_position)
 
                 avance += 1
@@ -646,7 +646,6 @@ class CompilerDef():
 
             # Se actualiza la posicion en la linea
             line_position = line_position + avance
-
 
             if current_token and current_token.type != 'ERROR':
                 # Si el token es valido se guarda en los tokens reconocidos de la linea actual

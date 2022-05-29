@@ -134,6 +134,6 @@ example/
 *.gv.pdf
 
 output/
-input/compiler-def
-input/entry.w
+# input/compiler-def
+# input/entry.w
 lex-analyzer.py
