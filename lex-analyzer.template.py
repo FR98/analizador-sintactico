@@ -155,7 +155,8 @@ def run():
         for token in TOKENS:
             if token.type == 'KEYWORD':
                 if token.value == '\\n':
-                    tokens_flow_file.write('\n')
+                    continue
+                    # tokens_flow_file.write('\n')
                 else:
                     tokens_flow_file.write(f'{token.value}')
             elif token.type == 'space':
