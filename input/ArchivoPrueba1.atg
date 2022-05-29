@@ -21,22 +21,22 @@ PRODUCTIONS
 
 EstadoInicial = {Instruccion ";"}.
 
-Instruccion =									(. int resultado; .)
-	Expresion <ref resultado>					(. print(resultado); .)
+Instruccion =									(. int resultado .)
+	Expresion <ref resultado>					(. print(resultado) .)
 	.
 
-Expresion <ref int resultado> =					(. int resultado1, resultado2; .)
+Expresion <ref int resultado> =					(. int resultado1, resultado2 .)
 	Termino <ref resultado1>
-	{		"+" Termino <ref resultado2>		(. resultado1 += resultado2; .)
-		  | "-" Termino <ref resultado2>		(. resultado1 -= resultado2; .)
-	}											(. resultado = resultado1; .)
+	{		"+" Termino <ref resultado2>		(. resultado1 += resultado2 .)
+		  | "-" Termino <ref resultado2>		(. resultado1 -= resultado2 .)
+	}											(. resultado = resultado1 .)
 	.
 
-Termino <ref int resultado> =					(. int resultado1, resultado2; .)
+Termino <ref int resultado> =					(. int resultado1, resultado2 .)
 	Factor <ref resultado1>
-	{		"*" Factor <ref resultado2>			(. resultado1 *= resultado2; .)
-		  | "/" Factor <ref resultado2>			(. resultado1 /= resultado2; .)
-	}											(. resultado = resultado1; .)
+	{		"*" Factor <ref resultado2>			(. resultado1 *= resultado2 .)
+		  | "/" Factor <ref resultado2>			(. resultado1 /= resultado2 .)
+	}											(. resultado = resultado1 .)
 	.
 
 Factor <ref int resultado> =					(.int signo = 1;.)
@@ -44,10 +44,10 @@ Factor <ref int resultado> =					(.int signo = 1;.)
 	]
 	( 		Number <ref resultado>
 		  | "(" Expresion < ref resultado> ")"
-	)											(. resultado *= signo; .)
+	)											(. resultado *= signo .)
 	.
 
-Number <ref int resultado> = numero				(. resultado = ultimoToken.obtenerValor(); .)
+Number <ref int resultado> = numero				(. resultado = ultimoToken.obtenerValor() .)
 .
 
 END ArchivoPrueba1

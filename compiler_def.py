@@ -6,10 +6,47 @@
 
 # Lexical and Sintax Analyzer for Coco/L Compiler Definition
 
+"""
+Cocol = "COMPILER" ident
+    ScannerSpecification
+    ParserSpecification
+"END" ident '.'.
+
+ScannerSpecification =
+["CHARACTERS" { SetDecl }]
+["KEYWORDS" { KeywordDecl }]
+["TOKENS" { TokenDecl }]
+{ WhiteSpaceDecl }.
+
+SetDecl     = ident '=' Set.
+Set         = BasicSet { ('+'|'-') BasicSet }.
+BasicSet    = string | ident | Char [".." Char].
+Char        = char | "CHR" '(' number ')'.
+
+KeywordDecl = ident '=' string '.'
+
+TokenDecl   = ident ['=' TokenExpr ] ["EXCEPT KEYWORDS"] '.'.
+TokenExpr   = TokenTerm {'|' TokenTerm }.
+TokenTerm   = TokenFactor {TokenFactor}
+TokenFactor = Symbol | '(' TokenExpr ')' | '[' TokenExpr ']' | '{' TokenExpr '}'.
+Symbol      = ident | string | char
+
+WhiteSpaceDecl = "IGNORE" Set
+
+ParserSpecification = "PRODUCTIONS" {Production}.
+Production = ident [Attributes] [SemAction] '=' Expression '.'.
+Expression = Term { '|' Term }.
+Term = Factor { Factor }
+Factor = Symbol [Attributes] | '(' Expression ')' | '[' Expression ']' | '{' Expression '}' | SemAction.
+Attributes = "<." {ANY} ".>"
+SemAction = "(." {ANY} ".)"
+"""
+
 from afd import AFD
 from log import Log
 
-ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»'
+# ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»'
+ANY_BUT_QUOTES = '«««««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»¦<»¦>»'
 
 # CHARACTERS
 CHARACTERS = {
@@ -21,6 +58,8 @@ CHARACTERS = {
     '=': '=',
     '.': '.',
     '|': '|',
+    '<': '<',
+    '>': '>',
     '(': '(',
     ')': ')',
     '[': '[',
@@ -28,7 +67,7 @@ CHARACTERS = {
     '{': '{',
     '}': '}',
     'o': '+-',
-    's': '@~!#$%^&_;:,<>?',
+    's': '@~!#$%^&_;:,?',
     'l': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
     'd': '0123456789',
 }
@@ -61,6 +100,7 @@ KEYWORDS = {
 # TOKENS RE
 TOKENS_RE = {
     'semantic_action': '«(.««a¦"»¦\'»±.»)',
+    'attrs': '«<.««a¦"»¦\'»±.»>',
     'comment_block': '«/*««a¦"»¦\'»±*»/',
     'comment': '//««««l¦d»¦s»¦o»¦ »±',
     'char': '«\'«a¦"»±»\'',
@@ -346,20 +386,146 @@ PRODUCTIONS = {
         {
             'type': 'KEYWORD',
             'value': 'PRODUCTIONS',
-        # }, {
-        #     'type': 'PRODUCTION',
-        #     'value': 'ProdDecl',
-        #     'ocurrences': '+',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdDecl',
+            'ocurrences': '+',
+        }
+    ],
+    'ProdDecl': [
+        {
+            'type': 'ident',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdAttributes',
+            'ocurrences': 'opt',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdSemAction',
+            'ocurrences': 'opt',
+        }, {
+            'type': 'assign',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'final',
+        }
+    ],
+    'ProdAttributes': [
+        {
+            'type': 'string',
+            'match': '<.',
+        }, {
+            'type': 'ANY',
+        }, {
+            'type': 'string',
+            'match': '.>',
+        }
+    ],
+    'ProdSemAction': [
+        {
+            'type': 'string',
+            'match': '(.',
+        }, {
+            'type': 'ANY',
+        }, {
+            'type': 'string',
+            'match': '.)',
+        }
+    ],
+    'ProdExpr': [
+        {
+            'type': 'PRODUCTION',
+            'value': 'ProdTerm',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExprConvination',
+            'ocurrences': '+',
+        }
+    ],
+    'ProdExprConvination': [
+        {
+            'type': 'or',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdTerm',
+        }
+    ],
+    'ProdTerm': [
+        {
+            'type': 'PRODUCTION',
+            'value': 'ProdFactor',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdFactor',
+            'ocurrences': '+',
+        }
+    ],
+    'ProdFactor': [
+        {
+            'type': 'OPTIONS',
+            'options': [
+                {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdSymAttrs',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdExprGroup',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdExprOption',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdExprIteration',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdSemAction',
+                }
+            ]
+        }
+    ],
+    'ProdSymAttrs': [
+        {
+            'type': 'PRODUCTION',
+            'value': 'Symbol',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdAttributes',
+            'ocurrences': 'opt',
+        }
+    ],
+    'ProdExprGroup': [
+        {
+            'type': 'group',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'group',
+        }
+    ],
+    'ProdExprOption': [
+        {
+            'type': 'option',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'option',
+        }
+    ],
+    'ProdExprIteration': [
+        {
+            'type': 'iteration',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'iteration',
         }
     ],
 }
-# ParserSpecification = "PRODUCTIONS" {Production}.
-# Production = ident [Attributes] [SemAction] '=' Expression '.'.
-# Expression = Term{'|'Term}.
-# Term = Factor {Factor}
-# Factor = Symbol [Attributes] | '(' Expression ')' | '[' Expression ']' | '{' Expression '}' | SemAction.
-# Attributes = "<." {ANY} ".>"
-# SemAction = "(." {ANY} ".)"
 
 # -------------------------------------------------------
 
@@ -386,7 +552,12 @@ class Token():
 
 class CompilerDef():
     def __init__(self, file_lines):
-        self.file_lines = file_lines
+        # self.file_lines = file_lines
+        self.file_lines = []
+
+        for line in file_lines:
+            self.file_lines.append(line.replace('\t', ' ' * 4))
+
         self.lexical_errors = False
         self.sintax_errors = False
         self.tokens = []
@@ -403,6 +574,7 @@ class CompilerDef():
         self.has_lexical_errors()
 
         self.clean_tokens()
+        # TODO
         # self.check_sintax()
         # self.has_sintax_errors()
 
@@ -418,12 +590,12 @@ class CompilerDef():
             analyzed_lines = self.eval_line(line, line_index)
             line_index += analyzed_lines
 
-        # Log.OKGREEN('\n\nTokens found:')
-        # for token in self.tokens:
-        #     if token.type == 'ERROR':
-        #         Log.WARNING(token)
-        #     else:
-        #         Log.INFO(token)
+        Log.OKGREEN('\n\nTokens found:')
+        for token in self.tokens:
+            if token.type == 'ERROR':
+                Log.WARNING(token)
+            else:
+                Log.INFO(token)
 
     def eval_line(self, line, line_index):
         # Se extraen los tokens por linea
@@ -454,7 +626,11 @@ class CompilerDef():
 
                 # Se evalua el token actual
                 if line_position + avance <= len(line):
-                    current_token = Token(line[line_position:line_position + avance], line_index, line_position)
+                    if line[line_position:line_position + avance + 1] in ['(.', '<.']:
+                        current_token = Token(line[line_position:line_position + avance + 1], line_index, line_position)
+                    else:
+                        print(line[line_position:line_position + avance])
+                        current_token = Token(line[line_position:line_position + avance], line_index, line_position)
 
                 avance += 1
 

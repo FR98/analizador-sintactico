@@ -8,7 +8,7 @@ from afd import AFD
 from log import Log
 from lex_generator import LexGenerator
 
-ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»'
+ANY_BUT_QUOTES = '«««««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»¦<»¦>»'
 
 def lexical_generator():
     LexGenerator()
@@ -227,6 +227,28 @@ def afd_test():
             'w': 'string1@.)',
             'result': False
         }]
+    }, {
+        'name': 'attrs',
+        're': '«<.««a¦"»¦\'»±.»>',
+        'tests' : [{
+            'w': '<.string1@.>',
+            'result': True
+        }, {
+            'w': '<.string1 @.>',
+            'result': True
+        }, {
+            'w': '<. string1 " \' @ .>',
+            'result': True
+        }, {
+            'w': '.string1@.',
+            'result': False
+        }, {
+            'w': '<.string1@',
+            'result': False
+        }, {
+            'w': 'string1@.>',
+            'result': False
+        }]
     }]
 
     characters = {
@@ -238,6 +260,8 @@ def afd_test():
         '=': '=',
         '.': '.',
         '|': '|',
+        '<': '<',
+        '>': '>',
         '(': '(',
         ')': ')',
         '[': '[',
@@ -245,7 +269,7 @@ def afd_test():
         '{': '{',
         '}': '}',
         'o': '+-',
-        's': '@~!#$%^&_;:,<>?',
+        's': '@~!#$%^&_;:,?',
         'l': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
         'd': '0123456789',
     }

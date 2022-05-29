@@ -61,10 +61,10 @@ class RETree:
                         fin = j + extra
                         return fin
 
-            elif regex.match(r'[a-zA-Z±"\'/*=.|()[\]{} ]', partial_expression[i]):
+            elif regex.match(r'[a-zA-Z±"\'/*=.|()[\]{}<> ]', partial_expression[i]):
                 fin = i
                 for j in range(i + 1, len(partial_expression)):
-                    if not regex.match(r'[a-zA-Z±"\'/*=.|()[\]{} ]', partial_expression[j]): break
+                    if not regex.match(r'[a-zA-Z±"\'/*=.|()[\]{}<> ]', partial_expression[j]): break
                     fin = j
                 return fin
             i += 1
@@ -88,7 +88,7 @@ class RETree:
                             i = j
                             break
                 else:
-                    if partial_expression[i-1] in ['»', '±', '+', '?'] or regex.match(r'[a-zA-Z"\'/*=.|()[\]{} ]', partial_expression[i-1]):
+                    if partial_expression[i-1] in ['»', '±', '+', '?'] or regex.match(r'[a-zA-Z"\'/*=.|()[\]{}<> ]', partial_expression[i-1]):
                         fin_sub_re = self.get_final_of_expression(partial_expression[i:])
                         fin = i + 1 + fin_sub_re
                         self.get_nodes(partial_expression[i:fin], len(self.temp_roots))
@@ -97,8 +97,8 @@ class RETree:
                         if sub_tree_root is not None: self.add_node(temp_root_index, '.', None, sub_tree_root, 'l')
                         i = i + fin + 1
 
-            elif regex.match(r'[a-zA-Z#"\'/*=.|()[\]{} ]', partial_expression[i]):
-                if ((temp_root_index is None and self.current_node_head is None) or i == 0) and i + 1 < len(partial_expression) and regex.match(r'[a-zA-Z#"\'/*=.|()[\]{} ]', partial_expression[i+1]):
+            elif regex.match(r'[a-zA-Z#"\'/*=.|()[\]{}<> ]', partial_expression[i]):
+                if ((temp_root_index is None and self.current_node_head is None) or i == 0) and i + 1 < len(partial_expression) and regex.match(r'[a-zA-Z#"\'/*=.|()[\]{}<> ]', partial_expression[i+1]):
                     if i + 2 < len(partial_expression) and partial_expression[i+2] in ['±', '+', '?']:
                         self.add_node(temp_root_index, '.', Node(partial_expression[i]), Node(partial_expression[i+2], Node(partial_expression[i+1]), None), 'l')
                         i += 2
