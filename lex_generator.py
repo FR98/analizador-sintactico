@@ -9,9 +9,11 @@ from log import Log
 from compiler_def import CompilerDef
 
 class LexGenerator:
-    def __init__(self):
+    def __init__(self, compiler_def_file, entry_file):
         self.compiler_def = None
         self.FILE_LINES = []
+        self.compiler_def_file = compiler_def_file
+        self.entry_file = entry_file
         self.extract_compiler_def()
         self.lex_analyzer_construction()
         self.run_lex_analyzer()
@@ -36,7 +38,7 @@ class LexGenerator:
         Log.N('\nExtracting content from compiler definition file...')
 
         try:
-            entry_file = open('input/compiler-def', 'r')
+            entry_file = open(self.compiler_def_file, 'r')
         except IOError:
             Log.FAIL('\nFile not found or path is incorrect')
             exit()
@@ -98,7 +100,7 @@ class LexGenerator:
         try:
             Log.N('\n\n\n\n\n# -------------------------------------------------------')
             Log.N('\nRunning lexical analyzer...')
-            os.system('python3 lex-analyzer.py')
+            os.system(f'python3 lex-analyzer.py {self.entry_file}')
         except:
             Log.FAIL('\nThere was an error running the lexical analyzer.')
             exit()

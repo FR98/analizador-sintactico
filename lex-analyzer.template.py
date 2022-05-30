@@ -6,10 +6,13 @@
 
 # Lexical Analyzer for {{COMPILER_NAME}} Compiler
 
+import sys
 from afd import AFD
 from log import Log
 
 ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»'
+
+entry_file_name = sys.argv[1]
 
 # CHARACTERS
 {{CHARACTERS}}
@@ -109,7 +112,7 @@ def eval_line(entry_file_lines, line, line_index):
 
 def run():
     try:
-        entry_file = open('input/entry.w', 'r')
+        entry_file = open(entry_file_name, 'r')
     except IOError:
         print('File not found or path is incorrect')
         exit()
