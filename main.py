@@ -11,8 +11,8 @@ from lex_generator import LexGenerator
 
 ANY_BUT_QUOTES = '«««««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»¦<»¦>»'
 
-def lexical_generator(compiler_def_file, entry_file):
-    LexGenerator(compiler_def_file, entry_file)
+def lexical_generator(compiler_def_file_name, entry_file_name):
+    LexGenerator(compiler_def_file_name, entry_file_name)
 
 def afd_test():
     """
@@ -304,6 +304,15 @@ def afd_test():
 
 afd_test()
 
+
+try:
+    tokens_flow_file = open('output/tokens-flow', 'w+')
+    tokens_flow_file.write('')
+    tokens_flow_file.close()
+except:
+    Log.FAIL('\nThere was an error opening and writing on the file.')
+    exit()
+
 sg.theme('Dark')
 
 layout_font = 'Helvetica 15'
@@ -320,8 +329,8 @@ layout = [
 # Create the Window
 window = sg.Window('Analizador Lexico y Sintactico', layout, size=(1500,800))
 
-compiler_def_file = None
-entry_file = None
+compiler_def_file_name = None
+entry_file_name = None
 
 # Event Loop to process 'events' and get the 'values' of the inputs
 while True:
@@ -332,31 +341,26 @@ while True:
     # print('You entered ', values)
 
     if values['-Compiled-Def-'] and values['-Entry-File-']:
-        compiler_def_file = values['-Compiled-Def-']
-        entry_file = values['-Entry-File-']
+        compiler_def_file_name = values['-Compiled-Def-']
+        entry_file_name = values['-Entry-File-']
         break
 
 # lexical_generator()
 try:
-    if not compiler_def_file or not entry_file:
-        compiler_def_file = 'compiler_def'
-        entry_file = 'entry.w'
+    if not compiler_def_file_name or not entry_file_name:
+        compiler_def_file_name = 'compiler_def'
+        entry_file_name = 'entry.w'
 
     try:
-        entry_file = open(entry_file, 'r')
+        entry_file = open(entry_file_name, 'r')
+        entry_file_lines = entry_file.readlines()
+        entry_file.close()
+        [window['-Input-'].print(line) for line in entry_file_lines]
     except IOError:
         print('File not found or path is incorrect')
         exit()
 
-    entry_file_lines = entry_file.readlines()
-    entry_file.close()
-    [window['-Input-'].print(line) for line in entry_file_lines]
-
-
-    lexical_generator(compiler_def_file, entry_file)
-
-    # # Create the Window
-    # window = sg.Window('Tokens', layout, size=(600,400))
+    lexical_generator(compiler_def_file_name, entry_file_name)
 
     # Event Loop to process 'events' and get the 'values' of the inputs
     while True:
