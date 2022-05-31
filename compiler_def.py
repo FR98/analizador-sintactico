@@ -153,6 +153,10 @@ PRODUCTIONS = {
             'type': 'PRODUCTION',
             'value': 'TOKENS_SET',
             'optional': True,
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'WhiteSpaceDecl',
+            'optional': True,
         }
     ],
     'CHARACTERS_SET': [
@@ -184,6 +188,17 @@ PRODUCTIONS = {
             'type': 'PRODUCTION',
             'value': 'TokenDecl',
             'ocurrences': '+',
+        }
+    ],
+    'WhiteSpaceDecl': [
+        {
+            'type': 'string',
+            'match': 'IGNORE',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'Set',
+        }, {
+            'type': 'final',
         }
     ],
     'SetDecl': [
@@ -556,7 +571,20 @@ class CompilerDef():
         self.file_lines = []
 
         for line in file_lines:
-            self.file_lines.append(line.replace('\t', ' ' * 4))
+            clean_line = line
+
+            if '//' in clean_line:
+                clean_line = clean_line[:clean_line.index('//')]
+
+            self.file_lines.append(clean_line.replace('\t', ' ' * 4))
+
+            if 'TOKENS' in clean_line:
+                self.file_lines.append('menos = "-".')
+                self.file_lines.append('mas = "+".')
+                self.file_lines.append('por = "*".')
+                self.file_lines.append('div = "/".')
+                self.file_lines.append('parOpen = "(".')
+                self.file_lines.append('parClose = ")".')
 
         self.lexical_errors = False
         self.sintax_errors = False
@@ -566,6 +594,7 @@ class CompilerDef():
         self.CHARACTERS = {}
         self.KEYWORDS = {}
         self.TOKENS_RE = {}
+        self.WHITE_SPACE_DECL = {}
         self.PRODUCTIONS = {}
         self.symbols = {}
         self.current_token_index = 0
@@ -713,6 +742,11 @@ class CompilerDef():
 
         self.TOKENS_RE = {}
 
+        self.WHITE_SPACE_DECL = {
+            'char_numbers': [],
+            'strings': [],
+        }
+
         # --------------------------------------------------
 
         token_index = 0
@@ -804,7 +838,7 @@ class CompilerDef():
                             token_re_definition_tokens.append(temp_token)
                         count += 1
 
-                        if temp_token.value in ['TOKENS', 'PRODUCTIONS', 'END']:
+                        if temp_token.value in ['TOKENS', 'IGNORE', 'PRODUCTIONS', 'END']:
                             token_index -= count
                             break
                     token_index += count
@@ -821,6 +855,36 @@ class CompilerDef():
                                 value.append(token)
 
                         self.TOKENS_RE[definition_tokens[0].value] = value
+
+                elif token.value == 'IGNORE':
+                    count = 0
+                    white_space_decl_definition_tokens = []
+                    while True:
+                        temp_token = self.tokens_clean[token_index + count + 1]
+
+                        if temp_token.type == 'final':
+                            break
+                        else:
+                            white_space_decl_definition_tokens.append(temp_token)
+                        count += 1
+
+                        if temp_token.value in ['IGNORE', 'PRODUCTIONS', 'END']:
+                            token_index -= count
+                            break
+                    token_index += count
+
+                    for token in white_space_decl_definition_tokens:
+                        if token.value == '+':
+                            continue
+                        Log.WARNING(token.value)
+                        if token.type == 'ident':
+                            if token.value == 'CHR':
+                                if int(white_space_decl_definition_tokens[white_space_decl_definition_tokens.index(token) + 2].value) not in [10, 13]:
+                                    self.WHITE_SPACE_DECL['char_numbers'].append(int(white_space_decl_definition_tokens[white_space_decl_definition_tokens.index(token) + 2].value))
+                            else:
+                                self.WHITE_SPACE_DECL['strings'].append(self.CHARACTERS[token.value])
+                        elif token.type == 'string':
+                            self.WHITE_SPACE_DECL['strings'].append(token.value.replace('"', ''))
 
                 elif token.value == 'PRODUCTIONS' and self.tokens_clean[token_index + 1].type != 'final':
                     count = 0
