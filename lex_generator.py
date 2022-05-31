@@ -75,6 +75,12 @@ class LexGenerator:
                 tokens_re_to_replace += f"    '{key}': '{value}',\n"
             tokens_re_to_replace += '}'
 
+            ignore_to_replace = ''
+            ignore_to_replace += 'IGNORE = {\n'
+            ignore_to_replace += f"    'char_numbers': {self.compiler_def.WHITE_SPACE_DECL['char_numbers']},\n"
+            ignore_to_replace += f"    'strings': {self.compiler_def.WHITE_SPACE_DECL['strings']},\n"
+            ignore_to_replace += '}'
+
             productions_to_replace = ''
             productions_to_replace += 'PRODUCTIONS = {\n'
             for key, value in self.compiler_def.PRODUCTIONS.items():
@@ -86,6 +92,7 @@ class LexGenerator:
                 data = data.replace('{{CHARACTERS}}', characters_to_replace)
                 data = data.replace('{{KEYWORDS}}', keywords_to_replace)
                 data = data.replace('{{TOKENS_RE}}', tokens_re_to_replace)
+                data = data.replace('{{IGNORE}}', ignore_to_replace)
                 data = data.replace('{{PRODUCTIONS}}', productions_to_replace)
 
             with open('lex-analyzer.py', 'w') as file:

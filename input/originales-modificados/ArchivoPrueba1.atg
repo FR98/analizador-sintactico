@@ -4,19 +4,13 @@ CHARACTERS
 /*
 letra = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
 */
-digito = "0123456789"
-ign = CHR(9) + CHR(10) + CHR(13) + CHR(20). // tabulador, salto de línea, retorno de carro y espacio en blanco
+digito = "0123456789".
 
 TOKENS
 
-menos = "-".
-mas = "+".
-por = "*".
-div = "/".
-parOpen = "(".
-parClose = ")".
 numero = digito{digito}.
-ignore = ign.
+
+IGNORE CHR(9) + CHR(10) + CHR(13) + CHR(20). // tabulador, salto de línea, retorno de carro y espacio en blanco
 
 PRODUCTIONS
 

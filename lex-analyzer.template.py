@@ -23,6 +23,8 @@ entry_file_name = sys.argv[1]
 # TOKENS RE
 {{TOKENS_RE}}
 
+# Whitespace definition
+{{IGNORE}}
 
 # PRODUCTIONS
 {{PRODUCTIONS}}
@@ -46,6 +48,8 @@ class Token():
     def get_type_of(cls, word):
         if word in KEYWORDS.values():
             return 'KEYWORD'
+        elif word in [chr(number) for number in IGNORE['char_numbers']] or word in IGNORE['strings']:
+            return 'IGNORE'
         else:
             for token_type, re in TOKENS_RE.items():
                 if AFD(re.replace('a', ANY_BUT_QUOTES)).accepts(word, CHARACTERS):
@@ -156,6 +160,8 @@ def run():
         tokens_flow_file = open('output/tokens-flow', 'w+')
 
         for token in TOKENS:
+            if token.type == 'IGNORE':
+                continue
             if token.type == 'KEYWORD':
                 if token.value == '\\n':
                     continue

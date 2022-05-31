@@ -9,7 +9,8 @@ digito = "0123456789".
 TOKENS
 
 numero = digito{digito}.
-IGNORE = CHR(9) + CHR(10) + CHR(13) + CHR(20). // tabulador, salto de línea, retorno de carro y espacio en blanco
+
+IGNORE CHR(9) + CHR(10) + CHR(13) + CHR(20). // tabulador, salto de línea, retorno de carro y espacio en blanco
 
 PRODUCTIONS
 
@@ -37,7 +38,7 @@ Factor <.ref int resultado.> =					(.int signo = 1;.)
 	[		"-"									(.signo = -1;.) 
 	]
 	( 		Number <.ref resultado.>
-		  | "(" Expresion < ref resultado> ")"
+		  | "(" Expresion <. ref resultado.> ")"
 	)											(. resultado *= signo; .)
 	.
 
