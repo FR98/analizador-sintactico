@@ -7,12 +7,12 @@
 from afd import AFD
 from log import Log
 import PySimpleGUI as sg
-from lex_generator import LexGenerator
+from analyzer_generator import AnalyzerGenerator
 
 ANY_BUT_QUOTES = '«««««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»¦<»¦>»'
 
 def lexical_generator(compiler_def_file_name, entry_file_name):
-    LexGenerator(compiler_def_file_name, entry_file_name)
+    AnalyzerGenerator(compiler_def_file_name, entry_file_name)
 
 def afd_test():
     """

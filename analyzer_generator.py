@@ -8,7 +8,7 @@ import os
 from log import Log
 from compiler_def import CompilerDef
 
-class LexGenerator:
+class AnalyzerGenerator:
     def __init__(self, compiler_def_file, entry_file):
         self.compiler_def = None
         self.FILE_LINES = []
@@ -55,7 +55,7 @@ class LexGenerator:
         # Writing the lexical analyzer file
         # -------------------------------------------------------
         try:
-            os.system('cp lex-analyzer.template.py lex-analyzer.py')
+            os.system('cp analyzer.template.py analyzer.py')
 
             characters_to_replace = ''
             characters_to_replace += 'CHARACTERS = {\n'
@@ -87,7 +87,7 @@ class LexGenerator:
                 productions_to_replace += f"    '{key}': '{value}',\n"
             productions_to_replace += '}'
 
-            with open('lex-analyzer.py', 'r') as file:
+            with open('analyzer.py', 'r') as file:
                 data = file.read().replace('{{COMPILER_NAME}}', self.compiler_def.COMPILER_NAME)
                 data = data.replace('{{CHARACTERS}}', characters_to_replace)
                 data = data.replace('{{KEYWORDS}}', keywords_to_replace)
@@ -95,7 +95,7 @@ class LexGenerator:
                 data = data.replace('{{IGNORE}}', ignore_to_replace)
                 data = data.replace('{{PRODUCTIONS}}', productions_to_replace)
 
-            with open('lex-analyzer.py', 'w') as file:
+            with open('analyzer.py', 'w') as file:
                 file.write(data)
 
             Log.OKGREEN('\nLexical analyzer file generated successfully.\n')
@@ -107,7 +107,7 @@ class LexGenerator:
         try:
             Log.N('\n\n\n\n\n# -------------------------------------------------------')
             Log.N('\nRunning lexical analyzer...')
-            os.system(f'python3 lex-analyzer.py {self.entry_file}')
+            os.system(f'python3 analyzer.py {self.entry_file}')
         except:
             Log.FAIL('\nThere was an error running the lexical analyzer.')
             exit()

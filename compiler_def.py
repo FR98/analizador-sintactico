@@ -583,8 +583,8 @@ class CompilerDef():
                 self.file_lines.append('mas = "+".')
                 self.file_lines.append('por = "*".')
                 self.file_lines.append('div = "/".')
-                self.file_lines.append('parOpen = "(".')
-                self.file_lines.append('parClose = ")".')
+                self.file_lines.append('( = "(".')
+                self.file_lines.append(') = ")".')
 
         self.lexical_errors = False
         self.sintax_errors = False
@@ -1064,7 +1064,7 @@ class CompilerDef():
         return TOKENS_RE
 
     def parse_PRODUCTIONS(self, PRODUCTIONS):
-        options = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        options = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 
         for key, val in PRODUCTIONS.items():
             value = ''

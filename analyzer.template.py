@@ -189,3 +189,42 @@ try:
     run()
 except Exception as e:
     Log.FAIL('There is an error: ', e)
+
+instruction_word = ''
+for token in TOKENS:
+    if token.type == 'IGNORE':
+        continue
+    if token.type == 'KEYWORD':
+        if token.value == '\\n':
+            continue
+        else:
+            instruction_word += token.value
+    elif token.type == 'space':
+        continue
+    else:
+        instruction_word += token.value
+
+
+print(instruction_word)
+re = PRODUCTIONS['EstadoInicial']
+re_replace_index = 0
+
+while True:
+    print(re)
+
+    if AFD(re.replace('a', ANY_BUT_QUOTES)).accepts(instruction_word, CHARACTERS):
+        break
+
+    print("AVER", re[re_replace_index])
+    replace_re = CHARACTERS.get(re[re_replace_index])
+
+    if PRODUCTIONS.get(replace_re):
+        replace_re = PRODUCTIONS[replace_re]
+
+    if replace_re:
+        re = re.replace(re[re_replace_index], replace_re)
+
+    re_replace_index += 1
+
+    if re_replace_index >= len(re):
+        break
