@@ -556,7 +556,12 @@ class CompilerDef():
         self.file_lines = []
 
         for line in file_lines:
-            self.file_lines.append(line.replace('\t', ' ' * 4))
+            clean_line = line
+
+            if '//' in clean_line:
+                clean_line = clean_line[:clean_line.index('//')]
+
+            self.file_lines.append(clean_line.replace('\t', ' ' * 4))
 
         self.lexical_errors = False
         self.sintax_errors = False
@@ -711,7 +716,14 @@ class CompilerDef():
             'NEWLINE': '\\\\n',
         }
 
-        self.TOKENS_RE = {}
+        self.TOKENS_RE = {
+            # 'menos': '-',
+            # 'mas': '+',
+            # 'por': '*',
+            # 'div': '/',
+            # 'parOpen': '(',
+            # 'parClose': ')',
+        }
 
         # --------------------------------------------------
 

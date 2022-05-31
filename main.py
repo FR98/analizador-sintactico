@@ -356,8 +356,8 @@ try:
         entry_file_lines = entry_file.readlines()
         entry_file.close()
         [window['-Input-'].print(line) for line in entry_file_lines]
-    except IOError:
-        print('File not found or path is incorrect')
+    except Exception as e:
+        print('Error: ', e)
         exit()
 
     lexical_generator(compiler_def_file_name, entry_file_name)
@@ -372,8 +372,8 @@ try:
 
         try:
             tokens_flow_file = open('output/tokens-flow', 'r')
-        except IOError:
-            print('File not found or path is incorrect')
+        except Exception as e:
+            print('Error: ', e)
             exit()
 
         tokens_extracted = tokens_flow_file.readlines()
@@ -387,5 +387,13 @@ try:
 
 except Exception as e:
     Log.FAIL('\nUnable to generate lexical analyzer. Error: ', e)
+
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event == 'Exit':
+        break
+    
+    print('Press exit or close the window to exit')
+
 
 window.close()

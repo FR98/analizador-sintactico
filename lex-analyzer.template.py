@@ -113,8 +113,8 @@ def eval_line(entry_file_lines, line, line_index):
 def run():
     try:
         entry_file = open(entry_file_name, 'r')
-    except IOError:
-        print('File not found or path is incorrect')
+    except Exception as e:
+        print('Error: ', e)
         exit()
 
     entry_file_lines = entry_file.readlines()
