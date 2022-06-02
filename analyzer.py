@@ -64,10 +64,10 @@ PRODUCTIONS = {
     'Expresion1': 'e«Te»±',
     'Termino0': 'f«Vf»±',
     'Termino1': 'f«Uf»±',
-    'Factor0': '(WdX)',
-    'Factor1': 'S(WdX)',
-    'Factor2': '(g)',
-    'Factor3': 'S(g)',
+    'Factor0': 'WdX',
+    'Factor1': 'SWdX',
+    'Factor2': 'g',
+    'Factor3': 'Sg',
     'Number0': 'h',
 }
 

@@ -1143,11 +1143,11 @@ class CompilerDef():
                 or_r_option = production[or_position + 1:production.index(close)]
 
                 if '[' not in production:
-                    exprs.append(production.replace(or_l_option, '').replace('¦', ''))
-                    exprs.append(production.replace(or_r_option, '').replace('¦', ''))
+                    exprs.append(production.replace(or_l_option, '').replace('¦', '').replace('(', '').replace(')', ''))
+                    exprs.append(production.replace(or_r_option, '').replace('¦', '').replace('(', '').replace(')', ''))
                 else:
-                    variant1 = production.replace(or_l_option, '').replace('¦', '')
-                    variant2 = production.replace(or_r_option, '').replace('¦', '')
+                    variant1 = production.replace(or_l_option, '').replace('¦', '').replace('(', '').replace(')', '')
+                    variant2 = production.replace(or_r_option, '').replace('¦', '').replace('(', '').replace(')', '')
 
                     option1 = variant1[variant1.index('['):variant1.index(']')+1]
                     exprs.append(variant1.replace(option1, ''))
