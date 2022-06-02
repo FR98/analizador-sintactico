@@ -619,12 +619,12 @@ class CompilerDef():
             analyzed_lines = self.eval_line(line, line_index)
             line_index += analyzed_lines
 
-        Log.OKGREEN('\n\nTokens found:')
-        for token in self.tokens:
-            if token.type == 'ERROR':
-                Log.WARNING(token)
-            else:
-                Log.INFO(token)
+        # Log.OKGREEN('\n\nTokens found:')
+        # for token in self.tokens:
+        #     if token.type == 'ERROR':
+        #         Log.WARNING(token)
+        #     else:
+        #         Log.INFO(token)
 
     def eval_line(self, line, line_index):
         # Se extraen los tokens por linea
@@ -667,12 +667,6 @@ class CompilerDef():
                 if line_position + avance <= len(line):
                     next_token = Token(line[line_position:line_position + avance], line_index, line_position)
 
-                # Log.WARNING(current_token)
-                # if current_token.type == 'ERROR':
-                #     Log.WARNING(current_token)
-                # else:
-                #     Log.INFO(current_token)
-
             # Se actualiza la posicion en la linea
             line_position = line_position + avance
 
@@ -712,6 +706,8 @@ class CompilerDef():
             Log.WARNING('\nPlease fix errors before continuing')
             exit()
 
+        Log.OKBLUE('\n\nFinish lexical errors')
+
     def clean_tokens(self):
         # for token in self.tokens:
         token_index = 0
@@ -728,8 +724,12 @@ class CompilerDef():
             else:
                 self.tokens_clean.append(token)
 
+        Log.OKGREEN('\n\nTokens found:')
         for token in self.tokens_clean:
-            Log.INFO(token)
+            if token.type == 'ERROR':
+                Log.WARNING(token)
+            else:
+                Log.INFO(token)
 
     def get_definitions(self):
         # Gramaticas libres de contexto - Analisis Sintactico
@@ -876,7 +876,6 @@ class CompilerDef():
                     for token in white_space_decl_definition_tokens:
                         if token.value == '+':
                             continue
-                        Log.WARNING(token.value)
                         if token.type == 'ident':
                             if token.value == 'CHR':
                                 if int(white_space_decl_definition_tokens[white_space_decl_definition_tokens.index(token) + 2].value) not in [10, 13]:
@@ -906,8 +905,10 @@ class CompilerDef():
                     token_index += count
 
                     for definition_tokens in production_section_definitions:
+                        print('definition_tokens:--------------------------')
                         value = []
                         for token in definition_tokens[2::]:
+                            print(f'{token.type} \t\t {token.value}')
                             if token.type == 'ident':
                                 if token.value not in ['EXCEPT', 'KEYWORDS']:
                                     value.append(token)
@@ -1057,7 +1058,6 @@ class CompilerDef():
                                 self.CHARACTERS[o] = token.value.replace('"', '')
                                 break
                         # value += token.value
-                        print(token)
 
             TOKENS_RE[key] = self.changeExp(value)
 
@@ -1084,7 +1084,6 @@ class CompilerDef():
                                 self.CHARACTERS[o] = token.value.replace('"', '')
                                 break
                         # value += token.value
-                        print(token)
 
             PRODUCTIONS[key] = self.changeExp(value)
 
