@@ -58,12 +58,17 @@ IGNORE = {
 
 # PRODUCTIONS
 PRODUCTIONS = {
-    'EstadoInicial': '«bc»±',
-    'Instruccion': 'd',
-    'Expresion': 'e«Te¦Se»±',
-    'Termino': 'f«Uf¦Vf»±',
-    'Factor': '[S](g¦WdX)',
-    'Number': 'h',
+    'EstadoInicial0': '«bc»±',
+    'Instruccion0': 'd',
+    'Expresion0': 'e«Se»±',
+    'Expresion1': 'e«Te»±',
+    'Termino0': 'f«Vf»±',
+    'Termino1': 'f«Uf»±',
+    'Factor0': '(WdX)',
+    'Factor1': 'S(WdX)',
+    'Factor2': '(g)',
+    'Factor3': 'S(g)',
+    'Number0': 'h',
 }
 
 
@@ -243,7 +248,7 @@ for token in TOKENS:
 
 
 print(instruction_word)
-re = PRODUCTIONS['EstadoInicial']
+re = PRODUCTIONS['EstadoInicial0']
 re_replace_index = 0
 
 # while True:

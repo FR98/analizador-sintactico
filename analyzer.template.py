@@ -206,7 +206,7 @@ for token in TOKENS:
 
 
 print(instruction_word)
-re = PRODUCTIONS['EstadoInicial']
+re = PRODUCTIONS['EstadoInicial0']
 re_replace_index = 0
 
 # while True:

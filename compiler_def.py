@@ -905,18 +905,18 @@ class CompilerDef():
                     token_index += count
 
                     for definition_tokens in production_section_definitions:
-                        print('definition_tokens:--------------------------')
-                        value = []
+                        expr = []
                         for token in definition_tokens[2::]:
-                            print(f'{token.type} \t\t {token.value}')
+                            # print(f'{token.type}')
                             if token.type == 'ident':
                                 if token.value not in ['EXCEPT', 'KEYWORDS']:
-                                    value.append(token)
+                                    expr.append(token)
                             elif token.type == 'string':
-                                value.append(token)
+                                expr.append(token)
                             elif token.type in ['iteration', 'option', 'group', 'or']:
-                                value.append(token)
-                        self.PRODUCTIONS[definition_tokens[0].value] = value
+                                expr.append(token)
+
+                        self.PRODUCTIONS[definition_tokens[0].value] = expr
 
             token_index += 1
 
@@ -1087,7 +1087,15 @@ class CompilerDef():
 
             PRODUCTIONS[key] = self.changeExp(value)
 
-        return PRODUCTIONS
+
+        PRODUCTIONS_PARSED = {}
+        for key, production in PRODUCTIONS.items():
+            variants = self.get_production_variants(production)
+
+            for variant in variants:
+                PRODUCTIONS_PARSED[f'{key}{variants.index(variant)}'] = variant
+
+        return PRODUCTIONS_PARSED
 
     def changeExp(self, re):
         cont = 0
@@ -1110,6 +1118,54 @@ class CompilerDef():
             re = re[:closeK[i]+1+i] + '±' + re[closeK[i]+1+i:]
 
         return re
+
+    def get_production_variants(self, production):
+        exprs = []
+
+        if '¦' in production or '[' in production:
+
+            if '¦' in production:
+                or_position = production.index('¦')
+
+                open = None
+                for i in production[::-1][or_position+1:]:
+                    if i in ['(', '«']:
+                        open = i
+                        break
+
+                close = None
+                for i in production[or_position+1:]:
+                    if i in [')', '»']:
+                        close = i
+                        break
+
+                or_l_option = production[production.index(open) + 1:or_position]
+                or_r_option = production[or_position + 1:production.index(close)]
+
+                if '[' not in production:
+                    exprs.append(production.replace(or_l_option, '').replace('¦', ''))
+                    exprs.append(production.replace(or_r_option, '').replace('¦', ''))
+                else:
+                    variant1 = production.replace(or_l_option, '').replace('¦', '')
+                    variant2 = production.replace(or_r_option, '').replace('¦', '')
+
+                    option1 = variant1[variant1.index('['):variant1.index(']')+1]
+                    exprs.append(variant1.replace(option1, ''))
+                    exprs.append(variant1.replace(option1, option1.replace('[', '').replace(']', '')))
+
+                    option2 = variant2[variant2.index('['):variant2.index(']')+1]
+                    exprs.append(variant2.replace(option2, ''))
+                    exprs.append(variant2.replace(option2, option2.replace('[', '').replace(']', '')))
+
+            elif '[' in production:
+                option = production[production.index('['):production.index(']')+1]
+                exprs.append(production.replace(option, ''))
+                exprs.append(production.replace(option, option.replace('[', '').replace(']', '')))
+
+        else:
+            exprs.append(production)
+
+        return exprs
 
     def has_sintax_errors(self):
         if self.sintax_errors:
