@@ -1,6 +1,6 @@
 # -------------------------------------------------------
 # Diseño de Lenguajes de Programación
-# Lexical Analyzer Generator Main
+# Analyzer Generator Main
 # Francisco Rosal - 18676
 # -------------------------------------------------------
 
@@ -11,7 +11,7 @@ from analyzer_generator import AnalyzerGenerator
 
 ANY_BUT_QUOTES = '«««««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»¦<»¦>»'
 
-def lexical_generator(compiler_def_file_name, entry_file_name):
+def analyzer_generator(compiler_def_file_name, entry_file_name):
     AnalyzerGenerator(compiler_def_file_name, entry_file_name)
 
 def afd_test():
@@ -345,7 +345,7 @@ while True:
         entry_file_name = values['-Entry-File-']
         break
 
-# lexical_generator()
+# analyzer_generator()
 try:
     if not compiler_def_file_name or not entry_file_name:
         compiler_def_file_name = 'compiler_def'
@@ -360,7 +360,7 @@ try:
         print('Error: ', e)
         exit()
 
-    lexical_generator(compiler_def_file_name, entry_file_name)
+    analyzer_generator(compiler_def_file_name, entry_file_name)
 
     # Event Loop to process 'events' and get the 'values' of the inputs
     while True:
