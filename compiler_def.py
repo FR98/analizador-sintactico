@@ -1172,3 +1172,20 @@ class CompilerDef():
             Log.FAIL('\nSintax errors found on compiler definition file')
             Log.WARNING('\nPlease fix errors before continuing')
             exit()
+
+    def get_production_tokens(self):
+        production_tokens = []
+
+        in_production_tokens = False
+        for token in self.tokens_clean:
+            if token.value == 'PRODUCTIONS':
+                in_production_tokens = True
+                continue
+            elif token.value == 'END':
+                in_production_tokens = False
+                continue
+
+            if in_production_tokens:
+                production_tokens.append(token)
+
+        return production_tokens

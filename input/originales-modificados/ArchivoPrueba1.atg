@@ -16,33 +16,33 @@ PRODUCTIONS
 
 EstadoInicial = {Instruccion ";"}.
 
-Instruccion =									(. resultado = .)
+Instruccion =									(. resultado = 0 .)
 	Expresion <.ref resultado.>					(. print(resultado) .)
 	.
 
-Expresion <.ref int resultado.> =					(. resultado1, resultado2 = .)
+Expresion <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
 	Termino <.ref resultado1.>
 	{		"+" Termino <.ref resultado2.>		(. resultado1 += resultado2 .)
 		  | "-" Termino <.ref resultado2.>		(. resultado1 -= resultado2 .)
-	}											(. resultado = resultado1 .)
+	}											(. return resultado1 .)
 	.
 
-Termino <.ref int resultado.> =					(. resultado1, resultado2 = .)
+Termino <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
 	Factor <.ref resultado1.>
 	{		"*" Factor <.ref resultado2.>			(. resultado1 *= resultado2 .)
 		  | "/" Factor <.ref resultado2.>			(. resultado1 /= resultado2 .)
-	}											(. resultado = resultado1 .)
+	}											(. return resultado1 .)
 	.
 
-Factor <.ref int resultado.> =					(.signo = 1.)
+Factor <.ref resultado.> =					(.signo = 1.)
 	[		"-"									(.signo = -1.) 
 	]
 	( 		Number <.ref resultado.>
 		  | "(" Expresion <. ref resultado.> ")"
-	)											(. resultado *= signo .)
+	)											(. return resultado * signo .)
 	.
 
-Number <.ref int resultado.> = numero				(. resultado = ultimoToken.obtenerValor() .)
+Number <.ref resultado.> = numero				(. return ultimoToken.obtenerValor() .)
 .
 
 END ArchivoPrueba1.

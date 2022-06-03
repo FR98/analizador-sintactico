@@ -137,3 +137,4 @@ output/
 # input/compiler-def
 # input/entry.w
 analyzer.py
+parser.py
