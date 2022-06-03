@@ -136,4 +136,4 @@ example/
 output/
 # input/compiler-def
 # input/entry.w
-lex-analyzer.py
+analyzer.py
