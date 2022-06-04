@@ -123,14 +123,12 @@ class AnalyzerGenerator:
     def getNonTerminalesNum(self):
         for k, v in self.compiler_def.PRODUCTIONS.items():
             nonTerminal = k
-            print(nonTerminal)
             if nonTerminal not in self.noTerminalesNumber:
                 self.noTerminalesNumber.append(nonTerminal)
 
     def getNonTerminales(self):
         for k, v in self.compiler_def.PRODUCTIONS.items():
             nonTerminal = k[:-1]
-            print(nonTerminal)
             if nonTerminal not in self.noTerminales:
                 self.noTerminales.append(nonTerminal)
 
@@ -145,7 +143,7 @@ class AnalyzerGenerator:
                     self.funcion_primero(k, primeros)
                 elif self.compiler_def.CHARACTERS[string_production[0]] not in self.noTerminales:
                     self.funcion_primero(self.compiler_def.CHARACTERS[string_production[0]], primeros)
-                
+
         return primeros
 
     def parser_construction(self):
@@ -289,6 +287,14 @@ class AnalyzerGenerator:
                 file.writelines(parser_class_header)
                 file.writelines(parser_file_lines)
                 file.writelines(class_init)
+
+            Log.INFO('Parser file generated successfully.\n')
+
+            Log.N('\n\n\n\n\n# -------------------------------------------------------')
+            Log.N('\nRunning parser...')
+            os.system(f'python3 parser.py')
+
+            Log.INFO('Parser finished successfully.\n')
         except:
             Log.FAIL('\nThere was an error opening and writing on the file.')
             exit()
