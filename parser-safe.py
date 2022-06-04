@@ -80,11 +80,8 @@ class Parser():
         return resultado * signo
 
     def Number(self, resultado):
-        numero = 0
-        if self.current_token['type'] == 'numero':
-            numero = float(self.current_token['value'])
-            self.update_current_token()
-
+        numero = float(self.current_token['value'])
+        self.update_current_token()
         return numero
 
 Parser([

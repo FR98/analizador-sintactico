@@ -564,6 +564,9 @@ class Token():
                     return token_type
         return 'ERROR'
 
+    def set_type(self, type):
+        self.type = type
+        return self
 
 class CompilerDef():
     def __init__(self, file_lines):
@@ -1186,6 +1189,10 @@ class CompilerDef():
                 continue
 
             if in_production_tokens:
+                if token.type == 'ident' and self.TOKENS_RE.get(token.value):
+                    production_tokens.append(token.set_type('token'))
+                    continue
+
                 production_tokens.append(token)
 
         return production_tokens

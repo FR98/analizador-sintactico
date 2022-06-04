@@ -176,6 +176,11 @@ class AnalyzerGenerator:
                     tabs_str = '\t' * tabs
                     parser_file_lines.append(f'{tabs_str}self.{token.value}()\n')
 
+            if token.type == 'token':
+                tabs_str = '\t' * tabs
+                parser_file_lines.append(f'{tabs_str}{token.value} = float(self.current_token["value"])\n')
+                parser_file_lines.append(f'{tabs_str}self.update_current_token()\n')
+
             if token.type == 'string':
                 if token.value != '")"':
                     if on_if:
