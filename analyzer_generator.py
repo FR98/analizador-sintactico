@@ -119,38 +119,55 @@ class AnalyzerGenerator:
         production_tokens = self.compiler_def.get_production_tokens()
 
         starting_production = True
+        tabs = 0
+        on_if = False
         for token in production_tokens:
-            if token.type not in ['attrs', 'semantic_action', 'assign', 'final']:
-                Log.FAIL(f'{token.type} \t\t {token.value}')
+            Log.FAIL(f'{token.type} \t\t {token.value}')
 
             if starting_production:
                 next_token = production_tokens[production_tokens.index(token) + 1]
+                tabs = 1
                 if next_token.type == 'attrs':
                     ref = next_token.value.replace('<.', '').replace('.>', '').replace('ref', '').strip()
-                    parser_file_lines.append(f'\tdef {token.value}(self, {ref}):\n')
+                    tabs_str = '\t' * tabs
+                    parser_file_lines.append(f'{tabs_str}def {token.value}(self, {ref}):\n')
                 else:
-                    parser_file_lines.append(f'\tdef {token.value}(self):\n')
+                    tabs_str = '\t' * tabs
+                    parser_file_lines.append(f'{tabs_str}def {token.value}(self):\n')
+                tabs = 2
 
             if token.type == 'semantic_action':
                 action = token.value.replace('(.', '').replace('.)', '').strip()
-                parser_file_lines.append(f'\t\t{action}\n')
+                if 'return' in action and on_if:
+                    tabs -= 1
+                tabs_str = '\t' * tabs
+                parser_file_lines.append(f'{tabs_str}{action}\n')
 
             if token.type == 'ident' and not starting_production:
                 next_token = production_tokens[production_tokens.index(token) + 1]
                 if next_token.type == 'attrs':
                     ref = next_token.value.replace('<.', '').replace('.>', '').replace('ref', '').strip()
-                    parser_file_lines.append(f'\t\t{ref} = self.{token.value}({ref})\n')
+                    tabs_str = '\t' * tabs
+                    parser_file_lines.append(f'{tabs_str}{ref} = self.{token.value}({ref})\n')
                 else:
-                    parser_file_lines.append(f'\t\tself.{token.value}()\n')
+                    tabs_str = '\t' * tabs
+                    parser_file_lines.append(f'{tabs_str}self.{token.value}()\n')
 
             if token.type == 'string':
-                parser_file_lines.append(f'\n')
-                parser_file_lines.append(f'\t\tif self.current_token["value"] == {token.value}:\n')
-                parser_file_lines.append(f'\t\t\tself.update_current_token()\n')
+                if on_if:
+                    tabs -= 1
 
-                print(production_tokens[production_tokens.index(token) + 1])
+                on_if = True
+                parser_file_lines.append(f'\n')
+                tabs_str = '\t' * tabs
+                parser_file_lines.append(f'{tabs_str}if self.current_token["value"] == {token.value}:\n')
+                tabs += 1
+                tabs_str = '\t' * tabs
+                parser_file_lines.append(f'{tabs_str}self.update_current_token()\n')
 
             if token.type == 'final':
+                tabs = 0
+                on_if = False
                 parser_file_lines.append('\n')
                 Log.INFO('Fin de produccion.\n')
                 starting_production = True
