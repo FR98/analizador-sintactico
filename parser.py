@@ -17,7 +17,7 @@ class Parser():
 			self.current_token = self.tokens[self.current_token_index]
 
 	def EstadoInicial(self):
-		while self.current_token['type'] in ['numero']:
+		while self.current_token['type'] in ['(', '-', 'numero']:
 			self.Instruccion()
 
 			if self.current_token["value"] == ";":
@@ -26,42 +26,64 @@ class Parser():
 	def Instruccion(self):
 		resultado = 0
 		resultado = self.Expresion(resultado)
-		print("Resultado: ", resultado)
+		print(resultado)
 
 	def Expresion(self, resultado):
 		resultado1, resultado2 = 0, 0
 		resultado1 = self.Termino(resultado1)
-		while self.current_token['value'] in ['&']:
+		while self.current_token['value'] in ['+', '-']:
 
-			if self.current_token["value"] == "&":
+			if self.current_token["value"] == "+":
 				self.update_current_token()
 				resultado2 = self.Termino(resultado2)
-				resultado1 = resultado1 and resultado2
+				resultado1 += resultado2
+				print("Termino: ", resultado1)
+
+			if self.current_token["value"] == "-":
+				self.update_current_token()
+				resultado2 = self.Termino(resultado2)
+				resultado1 -= resultado2
 
 		return resultado1
 
 	def Termino(self, resultado):
 		resultado1, resultado2 = 0, 0
 		resultado1 = self.Factor(resultado1)
-		while self.current_token['value'] in ['|']:
+		while self.current_token['value'] in ['*', '/']:
 
-			if self.current_token["value"] == "|":
+			if self.current_token["value"] == "*":
 				self.update_current_token()
 				resultado2 = self.Factor(resultado2)
-				resultado1 = resultado1 or resultado2
+				resultado1 *= resultado2
+
+			if self.current_token["value"] == "/":
+				self.update_current_token()
+				resultado2 = self.Factor(resultado2)
+				resultado1 /= resultado2
 
 		return resultado1
 
 	def Factor(self, resultado):
-		resultado1 = 0
-		resultado1 = self.Numero(resultado1)
-		return resultado1
+		signo = 1
 
-	def Numero(self, resultado):
+		if self.current_token["value"] == "-":
+			self.update_current_token()
+			signo = -1
+
+		resultado = self.Number(resultado)
+
+		if self.current_token["value"] == "(":
+			self.update_current_token()
+			resultado = self.Expresion(resultado)
+			self.update_current_token()
+
+		return resultado * signo
+
+	def Number(self, resultado):
 		numero = None
 		if self.current_token["type"] == "numero":
 			numero = float(self.current_token["value"])
 			self.update_current_token()
 		return numero
 
-Parser([{'type': 'numero', 'value': '0'}, {'type': 'and', 'value': '&'}, {'type': 'numero', 'value': '0'}, {'type': 'pc', 'value': ';'}, {'type': 'numero', 'value': '1'}, {'type': 'and', 'value': '&'}, {'type': 'numero', 'value': '0'}, {'type': 'pc', 'value': ';'}, {'type': 'numero', 'value': '0'}, {'type': 'and', 'value': '&'}, {'type': 'numero', 'value': '1'}, {'type': 'pc', 'value': ';'}, {'type': 'numero', 'value': '1'}, {'type': 'and', 'value': '&'}, {'type': 'numero', 'value': '1'}, {'type': 'pc', 'value': ';'}, {'type': 'numero', 'value': '1'}, {'type': 'or', 'value': '|'}, {'type': 'numero', 'value': '1'}, {'type': 'pc', 'value': ';'}, {'type': 'numero', 'value': '1'}, {'type': 'or', 'value': '|'}, {'type': 'numero', 'value': '0'}, {'type': 'pc', 'value': ';'}, {'type': 'numero', 'value': '0'}, {'type': 'or', 'value': '|'}, {'type': 'numero', 'value': '1'}, {'type': 'pc', 'value': ';'}, {'type': 'numero', 'value': '0'}, {'type': 'or', 'value': '|'}, {'type': 'numero', 'value': '0'}, {'type': 'pc', 'value': ';'}])
+Parser([{'type': '-', 'value': '-'}, {'type': 'numero', 'value': '5'}, {'type': '+', 'value': '+'}, {'type': 'numero', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': '(', 'value': '('}, {'type': 'numero', 'value': '10'}, {'type': 'div', 'value': '/'}, {'type': 'numero', 'value': '2'}, {'type': ')', 'value': ')'}, {'type': '+', 'value': '+'}, {'type': 'numero', 'value': '2'}, {'type': 'f', 'value': ';'}])
