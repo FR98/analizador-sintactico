@@ -323,7 +323,7 @@ layout = [
     [sg.Button('OK', font=layout_font), sg.Button('Exit', font=layout_font)],
     [sg.Multiline(size=(200, 8), font='Helvetica 20', key='-Input-', disabled=True)],
     [sg.Multiline(size=(200, 8), font='Helvetica 20', key='-Output-', disabled=True)],
-    # [sg.Output(size=(200,15), font=layout_font)],
+    [sg.Output(size=(200,15), font=layout_font)],
 ]
 
 # Create the Window
