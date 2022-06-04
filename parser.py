@@ -68,7 +68,8 @@ class Parser():
 		if self.current_token["value"] == "-":
 			self.update_current_token()
 			signo = -1
-			resultado = self.Number(resultado)
+
+		resultado = self.Number(resultado)
 
 		if self.current_token["value"] == "(":
 			self.update_current_token()
@@ -78,8 +79,10 @@ class Parser():
 		return resultado * signo
 
 	def Number(self, resultado):
-		numero = float(self.current_token["value"])
-		self.update_current_token()
+		numero = None
+		if self.current_token["type"] == "numero":
+			numero = float(self.current_token["value"])
+			self.update_current_token()
 		return numero
 
-Parser([{'type': 'menos', 'value': '-'}, {'type': 'numero', 'value': '5'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': '(', 'value': '('}, {'type': 'numero', 'value': '10'}, {'type': 'div', 'value': '/'}, {'type': 'numero', 'value': '2'}, {'type': ')', 'value': ')'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '2'}])
+Parser([{'type': 'menos', 'value': '-'}, {'type': 'numero', 'value': '5'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': '(', 'value': '('}, {'type': 'numero', 'value': '10'}, {'type': 'div', 'value': '/'}, {'type': 'numero', 'value': '2'}, {'type': ')', 'value': ')'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '2'}, {'type': 'final', 'value': ';'}])

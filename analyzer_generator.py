@@ -137,7 +137,7 @@ class AnalyzerGenerator:
                     tabs_str = '\t' * tabs
                     parser_file_lines.append(f'{tabs_str}def {token.value}(self):\n')
                 tabs = 2
-            
+
             if token.type == 'iteration':
                 if current_def == 'EstadoInicial':
                     while_condition = "self.current_token['type'] in ['numero', 'menos', '(']"
@@ -168,6 +168,7 @@ class AnalyzerGenerator:
 
             if token.type == 'ident' and not starting_production:
                 next_token = production_tokens[production_tokens.index(token) + 1]
+
                 if next_token.type == 'attrs':
                     ref = next_token.value.replace('<.', '').replace('.>', '').replace('ref', '').strip()
                     tabs_str = '\t' * tabs
@@ -178,8 +179,13 @@ class AnalyzerGenerator:
 
             if token.type == 'token':
                 tabs_str = '\t' * tabs
+                parser_file_lines.append(f'{tabs_str}{token.value} = None\n')
+                parser_file_lines.append(f'{tabs_str}if self.current_token["type"] == "{token.value}":\n')
+                tabs += 1
+                tabs_str = '\t' * tabs
                 parser_file_lines.append(f'{tabs_str}{token.value} = float(self.current_token["value"])\n')
                 parser_file_lines.append(f'{tabs_str}self.update_current_token()\n')
+                tabs -= 1
 
             if token.type == 'string':
                 if token.value != '")"':
@@ -193,6 +199,11 @@ class AnalyzerGenerator:
                     tabs += 1
                 tabs_str = '\t' * tabs
                 parser_file_lines.append(f'{tabs_str}self.update_current_token()\n')
+
+            if token.type == 'option' and token.value == ']':
+                on_if = False
+                tabs -= 1
+                parser_file_lines.append('\n')
 
             if token.type == 'final':
                 tabs = 0
