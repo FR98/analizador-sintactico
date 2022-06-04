@@ -71,7 +71,8 @@ class Parser():
 
         if self.current_token['type'] == 'numero':
             resultado = self.Number(resultado)
-        else:
+
+        if self.current_token["value"] == "(":
             self.update_current_token()
             resultado = self.Expresion(resultado)
             self.update_current_token()
