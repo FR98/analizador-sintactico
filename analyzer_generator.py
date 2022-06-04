@@ -18,6 +18,12 @@ class AnalyzerGenerator:
         self.extract_compiler_def()
         self.lex_analyzer_construction()
         self.run_lex_analyzer()
+
+        self.noTerminales = []
+        self.noTerminalesNumber = []
+        self.getNonTerminales()
+        self.getNonTerminalesNum()
+        self.primeros_terminales = self.funcion_primero('EstadoInicial0')
         self.parser_construction()
 
     def add_header(self):
@@ -114,6 +120,34 @@ class AnalyzerGenerator:
             Log.FAIL('\nThere was an error running the lexical analyzer.')
             exit()
 
+    def getNonTerminalesNum(self):
+        for k, v in self.compiler_def.PRODUCTIONS.items():
+            nonTerminal = k
+            print(nonTerminal)
+            if nonTerminal not in self.noTerminalesNumber:
+                self.noTerminalesNumber.append(nonTerminal)
+
+    def getNonTerminales(self):
+        for k, v in self.compiler_def.PRODUCTIONS.items():
+            nonTerminal = k[:-1]
+            print(nonTerminal)
+            if nonTerminal not in self.noTerminales:
+                self.noTerminales.append(nonTerminal)
+
+    def funcion_primero(self, produccion, primeros = []):
+        if produccion not in self.noTerminalesNumber:
+            if produccion not in primeros:
+                primeros.append(produccion)
+        else:
+            for k, prod in self.compiler_def.PRODUCTIONS.items():
+                string_production = self.compiler_def.PRODUCTIONS[produccion].replace('«', '').replace('»', '').replace('±', '')
+                if self.compiler_def.CHARACTERS[string_production[0]] in k:
+                    self.funcion_primero(k, primeros)
+                elif self.compiler_def.CHARACTERS[string_production[0]] not in self.noTerminales:
+                    self.funcion_primero(self.compiler_def.CHARACTERS[string_production[0]], primeros)
+                
+        return primeros
+
     def parser_construction(self):
         parser_file_lines = []
         production_tokens = self.compiler_def.get_production_tokens()
@@ -140,7 +174,7 @@ class AnalyzerGenerator:
 
             if token.type == 'iteration':
                 if current_def == 'EstadoInicial':
-                    while_condition = "self.current_token['type'] in ['numero', 'menos', '(']"
+                    while_condition = f"self.current_token['type'] in {self.primeros_terminales}" # ['numero', 'menos', '(']
                 else:
                     strings_in_iteration = []
                     for t in production_tokens[production_tokens.index(token) + 1:]:
