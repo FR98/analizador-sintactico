@@ -582,12 +582,13 @@ class CompilerDef():
             self.file_lines.append(clean_line.replace('\t', ' ' * 4))
 
             if 'TOKENS' in clean_line:
-                self.file_lines.append('menos = "-".')
-                self.file_lines.append('mas = "+".')
+                self.file_lines.append('- = "-".')
+                self.file_lines.append('+ = "+".')
                 self.file_lines.append('por = "*".')
                 self.file_lines.append('div = "/".')
                 self.file_lines.append('( = "(".')
                 self.file_lines.append(') = ")".')
+                self.file_lines.append('pc = ";".')
 
         self.lexical_errors = False
         self.sintax_errors = False
