@@ -20,7 +20,7 @@ class Parser():
         while self.current_token['type'] in ['numero', 'menos', '(']:
             self.Instruccion()
 
-            if self.current_token['type'] == 'final':
+            if self.current_token['value'] == ';':
                 self.update_current_token()
 
     def Instruccion(self):
@@ -31,13 +31,14 @@ class Parser():
     def Expresion(self, resultado):
         resultado1, resultado2 = 0, 0
         resultado1 = self.Termino(resultado1)
+        while self.current_token['value'] in ['+', '-']:
 
-        while self.current_token['type'] in ['mas', 'menos']:
-            if self.current_token['type'] == 'mas':
+            if self.current_token['value'] == '+':
                 self.update_current_token()
                 resultado2 = self.Termino(resultado2)
                 resultado1 += resultado2
-            else:
+
+            if self.current_token['value'] == '-':
                 self.update_current_token()
                 resultado2 = self.Termino(resultado2)
                 resultado1 -= resultado2
@@ -47,13 +48,14 @@ class Parser():
     def Termino(self, resultado):
         resultado1, resultado2 = 0, 0
         resultado1 = self.Factor(resultado1)
+        while self.current_token['value'] in ['*', '/']:
 
-        while self.current_token['type'] in ['por', 'div']:
-            if self.current_token['type'] == 'por':
+            if self.current_token['value'] == '*':
                 self.update_current_token()
                 resultado2 = self.Factor(resultado2)
                 resultado1 *= resultado2
-            else:
+
+            if self.current_token['value'] == '/':
                 self.update_current_token()
                 resultado2 = self.Factor(resultado2)
                 resultado1 /= resultado2
@@ -62,13 +64,15 @@ class Parser():
 
     def Factor(self, resultado):
         signo = 1
-        if self.current_token['type'] in ['menos']:
+
+        if self.current_token['value'] == '-':
             self.update_current_token()
             signo = -1
 
-        if self.current_token['type'] in ['numero']:
+        if self.current_token['type'] == 'numero':
             resultado = self.Number(resultado)
-        else:
+
+        if self.current_token["value"] == "(":
             self.update_current_token()
             resultado = self.Expresion(resultado)
             self.update_current_token()
@@ -77,7 +81,7 @@ class Parser():
 
     def Number(self, resultado):
         numero = 0
-        if self.current_token['type'] in ['numero']:
+        if self.current_token['type'] == 'numero':
             numero = float(self.current_token['value'])
             self.update_current_token()
 
@@ -110,4 +114,4 @@ Parser([
     {'type': 'final', 'value': ';'}
 ])
 
-Parser([{'type': 'menos', 'value': '-'}, {'type': 'numero', 'value': '5'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': '(', 'value': '('}, {'type': 'numero', 'value': '10'}, {'type': 'div', 'value': '/'}, {'type': 'numero', 'value': '2'}, {'type': ')', 'value': ')'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '2'}])
+# Parser([{'type': 'menos', 'value': '-'}, {'type': 'numero', 'value': '5'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': '(', 'value': '('}, {'type': 'numero', 'value': '10'}, {'type': 'div', 'value': '/'}, {'type': 'numero', 'value': '2'}, {'type': ')', 'value': ')'}, {'type': 'mas', 'value': '+'}, {'type': 'numero', 'value': '2'}])

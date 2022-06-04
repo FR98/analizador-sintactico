@@ -42,7 +42,7 @@ Factor <.ref resultado.> =					(.signo = 1.)
 	)											(. return resultado * signo .)
 	.
 
-Number <.ref resultado.> = numero				(. return ultimoToken.obtenerValor() .)
+Number <.ref resultado.> = numero				(. return float(self.current_token['value']) .)
 .
 
 END ArchivoPrueba1.
