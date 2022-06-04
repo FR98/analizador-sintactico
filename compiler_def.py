@@ -588,6 +588,7 @@ class CompilerDef():
                 self.file_lines.append('div = "/".')
                 self.file_lines.append('( = "(".')
                 self.file_lines.append(') = ")".')
+                self.file_lines.append('pc = ";".')
 
         self.lexical_errors = False
         self.sintax_errors = False

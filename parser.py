@@ -86,4 +86,4 @@ class Parser():
 			self.update_current_token()
 		return numero
 
-Parser([{'type': '-', 'value': '-'}, {'type': 'numero', 'value': '5'}, {'type': '+', 'value': '+'}, {'type': 'numero', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': '(', 'value': '('}, {'type': 'numero', 'value': '10'}, {'type': 'div', 'value': '/'}, {'type': 'numero', 'value': '2'}, {'type': ')', 'value': ')'}, {'type': '+', 'value': '+'}, {'type': 'numero', 'value': '2'}, {'type': 'final', 'value': ';'}])
+Parser([{'type': '-', 'value': '-'}, {'type': 'numero', 'value': '5'}, {'type': '+', 'value': '+'}, {'type': 'numero', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': '(', 'value': '('}, {'type': 'numero', 'value': '10'}, {'type': 'div', 'value': '/'}, {'type': 'numero', 'value': '2'}, {'type': ')', 'value': ')'}, {'type': '+', 'value': '+'}, {'type': 'numero', 'value': '2'}, {'type': 'pc', 'value': ';'}])
