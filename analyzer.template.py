@@ -7,6 +7,7 @@
 # Lexical Analyzer for {{COMPILER_NAME}} Compiler
 
 import sys
+import json
 from afd import AFD
 from log import Log
 
@@ -190,7 +191,8 @@ try:
 except Exception as e:
     Log.FAIL('There is an error: ', e)
 
-instruction_word = ''
+# Generate tokens file
+instruction = []
 for token in TOKENS:
     if token.type == 'IGNORE':
         continue
@@ -198,33 +200,17 @@ for token in TOKENS:
         if token.value == '\\n':
             continue
         else:
-            instruction_word += token.value
+            instruction.append({
+                'type': token.type,
+                'value': token.value,
+            })
     elif token.type == 'space':
         continue
     else:
-        instruction_word += token.value
+        instruction.append({
+            'type': token.type,
+            'value': token.value,
+        })
 
-
-print(instruction_word)
-re = PRODUCTIONS['EstadoInicial0']
-re_replace_index = 0
-
-# while True:
-#     print(re)
-
-#     if AFD(re.replace('a', ANY_BUT_QUOTES)).accepts(instruction_word, CHARACTERS):
-#         break
-
-#     print("AVER", re[re_replace_index])
-#     replace_re = CHARACTERS.get(re[re_replace_index])
-
-#     if PRODUCTIONS.get(replace_re):
-#         replace_re = PRODUCTIONS[replace_re]
-
-#     if replace_re:
-#         re = re.replace(re[re_replace_index], replace_re)
-
-#     re_replace_index += 1
-
-#     if re_replace_index >= len(re):
-#         break
+with open('instruction.json', 'w', encoding='utf-8') as file:
+    json.dump(instruction, file, ensure_ascii = False, indent = 4)
