@@ -7,7 +7,7 @@
 from afd import AFD
 from log import Log
 import PySimpleGUI as sg
-from analyzer_generator import AnalyzerGenerator
+from lex_generator import AnalyzerGenerator
 
 ANY_BUT_QUOTES = '«««««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»¦<»¦>»'
 

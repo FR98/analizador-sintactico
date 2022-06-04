@@ -573,6 +573,28 @@ class CompilerDef():
         # self.file_lines = file_lines
         self.file_lines = []
 
+        production_section = ''
+        in_production_section = False
+        for line in file_lines:
+            clean_line = line
+
+            if 'PRODUCTIONS' in clean_line:
+                in_production_section = True
+
+            if in_production_section:
+                production_section += clean_line
+
+        cont = 0
+        special_chars = []
+        while cont < len(production_section):
+            if production_section[cont] == '"':
+                next_char = production_section[cont + 1]
+                next_char_2 = production_section[cont + 2]
+
+                if next_char_2 == '"':
+                    special_chars.append(next_char)
+            cont += 1
+
         for line in file_lines:
             clean_line = line
 
@@ -582,13 +604,19 @@ class CompilerDef():
             self.file_lines.append(clean_line.replace('\t', ' ' * 4))
 
             if 'TOKENS' in clean_line:
-                self.file_lines.append('- = "-".')
-                self.file_lines.append('+ = "+".')
-                self.file_lines.append('por = "*".')
-                self.file_lines.append('div = "/".')
-                self.file_lines.append('( = "(".')
-                self.file_lines.append(') = ")".')
-                self.file_lines.append('pc = ";".')
+                for special_char in special_chars:
+                    if special_char == '*':
+                        self.file_lines.append(f'por = "{special_char}".')
+                    elif special_char == '/':
+                        self.file_lines.append(f'div = "{special_char}".')
+                    elif special_char == ';':
+                        self.file_lines.append(f'f = "{special_char}".')
+                    elif special_char == '&':
+                        self.file_lines.append(f'and = "{special_char}".')
+                    elif special_char == '|':
+                        self.file_lines.append(f'or = "{special_char}".')
+                    else:
+                        self.file_lines.append(f'{special_char} = "{special_char}".')
 
         self.lexical_errors = False
         self.sintax_errors = False
