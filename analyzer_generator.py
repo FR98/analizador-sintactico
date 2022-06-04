@@ -121,12 +121,14 @@ class AnalyzerGenerator:
         starting_production = True
         tabs = 0
         on_if = False
+        current_def = None
         for token in production_tokens:
             Log.FAIL(f'{token.type} \t\t {token.value}')
 
             if starting_production:
                 next_token = production_tokens[production_tokens.index(token) + 1]
                 tabs = 1
+                current_def = token.value
                 if next_token.type == 'attrs':
                     ref = next_token.value.replace('<.', '').replace('.>', '').replace('ref', '').strip()
                     tabs_str = '\t' * tabs
@@ -135,11 +137,32 @@ class AnalyzerGenerator:
                     tabs_str = '\t' * tabs
                     parser_file_lines.append(f'{tabs_str}def {token.value}(self):\n')
                 tabs = 2
+            
+            if token.type == 'iteration':
+                if current_def == 'EstadoInicial':
+                    while_condition = "self.current_token['type'] in ['numero', 'menos', '(']"
+                else:
+                    strings_in_iteration = []
+                    for t in production_tokens[production_tokens.index(token) + 1:]:
+                        if t.type == 'string':
+                            strings_in_iteration.append(t.value.replace('"', ''))
+                        elif t.value == '}':
+                            break
+
+                    while_condition = f"self.current_token['type'] in {strings_in_iteration}"
+
+                if token.value == '{':
+                    tabs_str = '\t' * tabs
+                    parser_file_lines.append(f'{tabs_str}while {while_condition}:\n')
+                    tabs += 1
+                elif token.value == '}':
+                    tabs -= 1
 
             if token.type == 'semantic_action':
                 action = token.value.replace('(.', '').replace('.)', '').strip()
                 if 'return' in action and on_if:
                     tabs -= 1
+                    parser_file_lines.append('\n')
                 tabs_str = '\t' * tabs
                 parser_file_lines.append(f'{tabs_str}{action}\n')
 
@@ -158,7 +181,7 @@ class AnalyzerGenerator:
                     tabs -= 1
 
                 on_if = True
-                parser_file_lines.append(f'\n')
+                parser_file_lines.append('\n')
                 tabs_str = '\t' * tabs
                 parser_file_lines.append(f'{tabs_str}if self.current_token["value"] == {token.value}:\n')
                 tabs += 1
