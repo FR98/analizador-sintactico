@@ -71,4 +71,3 @@ class Parser():
 		print("Token: ", resultado)
 
 Parser([{'type': 'numeroToken', 'value': '3'}, {'type': 'mas', 'value': '+'}, {'type': 'numeroToken', 'value': '4'}, {'type': 'por', 'value': '*'}, {'type': 'numeroToken', 'value': '5'}, {'type': 'final', 'value': ';'}, {'type': 'numeroToken', 'value': '1'}, {'type': 'mas', 'value': '+'}, {'type': 'numeroToken', 'value': '1'}, {'type': 'final', 'value': ';'}, {'type': 'numeroToken', 'value': '9'}, {'type': 'final', 'value': ';'}])
-
