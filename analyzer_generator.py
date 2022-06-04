@@ -149,7 +149,7 @@ class AnalyzerGenerator:
                         elif t.value == '}':
                             break
 
-                    while_condition = f"self.current_token['type'] in {strings_in_iteration}"
+                    while_condition = f"self.current_token['value'] in {strings_in_iteration}"
 
                 if token.value == '{':
                     tabs_str = '\t' * tabs

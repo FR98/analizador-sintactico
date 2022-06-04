@@ -31,7 +31,7 @@ class Parser():
     def Expresion(self, resultado):
         resultado1, resultado2 = 0, 0
         resultado1 = self.Termino(resultado1)
-        while self.current_token['type'] in ['mas', 'menos']:
+        while self.current_token['value'] in ['+', '-']:
 
             if self.current_token['value'] == '+':
                 self.update_current_token()
@@ -48,7 +48,7 @@ class Parser():
     def Termino(self, resultado):
         resultado1, resultado2 = 0, 0
         resultado1 = self.Factor(resultado1)
-        while self.current_token['type'] in ['por', 'div']:
+        while self.current_token['value'] in ['*', '/']:
 
             if self.current_token['value'] == '*':
                 self.update_current_token()
