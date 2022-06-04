@@ -138,3 +138,4 @@ output/
 # input/entry.w
 analyzer.py
 parser.py
+instruction.json

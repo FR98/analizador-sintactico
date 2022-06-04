@@ -5,6 +5,7 @@
 # -------------------------------------------------------
 
 import os
+import json
 from log import Log
 from compiler_def import CompilerDef
 
@@ -119,7 +120,8 @@ class AnalyzerGenerator:
 
         starting_production = True
         for token in production_tokens:
-            Log.FAIL(f'{token.type} \t\t {token.value}')
+            if token.type not in ['attrs', 'semantic_action', 'assign', 'final']:
+                Log.FAIL(f'{token.type} \t\t {token.value}')
 
             if starting_production:
                 next_token = production_tokens[production_tokens.index(token) + 1]
@@ -141,9 +143,16 @@ class AnalyzerGenerator:
                 else:
                     parser_file_lines.append(f'\t\tself.{token.value}()\n')
 
+            if token.type == 'string':
+                parser_file_lines.append(f'\n')
+                parser_file_lines.append(f'\t\tif self.current_token["value"] == {token.value}:\n')
+                parser_file_lines.append(f'\t\t\tself.update_current_token()\n')
+
+                print(production_tokens[production_tokens.index(token) + 1])
+
             if token.type == 'final':
                 parser_file_lines.append('\n')
-                Log.INFO('\nFin de produccion.')
+                Log.INFO('Fin de produccion.\n')
                 starting_production = True
             else:
                 starting_production = False
@@ -162,16 +171,28 @@ class AnalyzerGenerator:
 
         parser_class_header = [
             'class Parser():\n',
-            '\tdef __init__(self):\n',
+            '\tdef __init__(self, tokens):\n',
+            '\t\tself.tokens = tokens\n',
+            '\t\tself.current_token_index = 0\n',
+            '\t\tself.current_token = self.tokens[self.current_token_index]\n',
             '\t\tself.EstadoInicial()\n',
+            '\n',
+            '\tdef update_current_token(self):\n',
+            '\t\tif self.current_token_index < len(self.tokens) - 1:\n',
+            '\t\t\tself.current_token_index += 1\n',
+            '\t\t\tself.current_token = self.tokens[self.current_token_index]\n',
             '\n',
         ]
 
-        class_init = [
-            'Parser()\n',
-        ]
-
         try:
+
+            with open('instruction.json', 'r') as file:
+                instruction_json = json.load(file)
+
+            class_init = [
+                f'Parser({instruction_json})\n',
+            ]
+
             with open('parser.py', 'w') as file:
                 file.writelines(header)
                 file.writelines(parser_class_header)
