@@ -280,10 +280,10 @@ class AnalyzerGenerator:
                 instruction_json = json.load(file)
 
             class_init = [
-                'try:',
+                'try:\n',
                 f'\tParser({instruction_json})\n',
-                'except:',
-                '\tprint("Error sintactico")',
+                'except:\n',
+                '\tprint("Error sintactico")\n',
             ]
 
             with open('parser.py', 'w') as file:
