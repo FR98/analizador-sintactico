@@ -51,10 +51,16 @@ class Token():
             return 'KEYWORD'
         elif word in [chr(number) for number in IGNORE['char_numbers']] or word in IGNORE['strings']:
             return 'IGNORE'
+        elif word in TOKENS_RE.keys():
+            return word
         else:
             for token_type, re in TOKENS_RE.items():
-                if AFD(re.replace('a', ANY_BUT_QUOTES)).accepts(word, CHARACTERS):
-                    return token_type
+                if len(re) == 1:
+                    if word == CHARACTERS[re]:
+                        return token_type
+                else:
+                    if AFD(re.replace('a', ANY_BUT_QUOTES)).accepts(word, CHARACTERS):
+                        return token_type
         return 'ERROR'
 
 # -------------------------------------------------------
