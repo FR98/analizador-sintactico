@@ -1,0 +1,46 @@
+COMPILER ArchivoPrueba0
+
+CHARACTERS
+
+digito = "0123456789".
+D = "D".
+
+TOKENS
+
+numeroToken = digito{digito}.
+IGNORE = CHR(9) + CHR(10) + CHR(13) + CHR(20). // tabulador, salto de línea, retorno de carro y espacio en blanco
+
+PRODUCTIONS
+
+EstadoInicial = {Instruccion ";"}.
+
+Instruccion =									(. resultado = 0 .)
+	Expresion <.ref resultado.>					(. print("Resultado: ", resultado) .)
+	.
+
+Expresion <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
+	Termino <.ref resultado1.>
+	{		"+" Termino <.ref resultado2.>		(. resultado1 += resultado2 .)
+												(. print("Termino: ", resultado1) .)
+	}											(. return resultado1 .)
+												(. print("Termino: ", resultado) .)
+	.
+
+Termino <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
+	Factor <.ref resultado1.>
+	{		"*" Factor <.ref resultado2.>			(. resultado1 *= resultado2  .)
+												   (. print("Factor: ", resultado1) .)
+	}											(. return resultado1 .)
+												   (. print("Factor: ", resultado) .)
+	.
+
+Factor <.ref resultado.> =					(. resultado1 = 0 .)
+	Numero <.ref resultado1.>						(. return resultado1 .)
+												   (. print("Numero: ", resultado) .)
+	.
+
+Numero <.ref resultado.> = numeroToken		(. return numeroToken .)
+												   (. print("Token: ", resultado) .)
+.
+
+END ArchivoPrueba0.

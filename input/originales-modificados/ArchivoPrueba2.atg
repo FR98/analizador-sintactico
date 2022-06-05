@@ -1,0 +1,39 @@
+COMPILER ArchivoPrueba0
+
+CHARACTERS
+
+digito = "01".
+
+TOKENS
+
+numero = digito{digito}.
+IGNORE = CHR(9) + CHR(10) + CHR(13) + CHR(20). // tabulador, salto de línea, retorno de carro y espacio en blanco
+
+PRODUCTIONS
+
+EstadoInicial = {Instruccion ";"}.
+
+Instruccion =									(. resultado = 0 .)
+	Expresion <.ref resultado.>					(. print("Resultado: ", resultado) .)
+	.
+
+Expresion <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
+	Termino <.ref resultado1.>
+	{		"&" Termino <.ref resultado2.>		(. resultado1 = resultado1 and resultado2 .)
+	}											(. return resultado1 .)
+	.
+
+Termino <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
+	Factor <.ref resultado1.>
+	{		"|" Factor <.ref resultado2.>			(. resultado1 = resultado1 or resultado2  .)
+	}											(. return resultado1 .)
+	.
+
+Factor <.ref resultado.> =					(. resultado1 = 0 .)
+	Numero <.ref resultado1.>						(. return resultado1 .)
+	.
+
+Numero <.ref resultado.> = numero		(. return numero .)
+.
+
+END ArchivoPrueba0.

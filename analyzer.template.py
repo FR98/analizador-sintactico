@@ -6,10 +6,14 @@
 
 # Lexical Analyzer for {{COMPILER_NAME}} Compiler
 
+import sys
+import json
 from afd import AFD
 from log import Log
 
 ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»'
+
+entry_file_name = sys.argv[1]
 
 # CHARACTERS
 {{CHARACTERS}}
@@ -20,8 +24,11 @@ ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»�
 # TOKENS RE
 {{TOKENS_RE}}
 
+# Whitespace definition
+{{IGNORE}}
 
 # PRODUCTIONS
+{{PRODUCTIONS}}
 
 
 TOKENS = []
@@ -42,6 +49,8 @@ class Token():
     def get_type_of(cls, word):
         if word in KEYWORDS.values():
             return 'KEYWORD'
+        elif word in [chr(number) for number in IGNORE['char_numbers']] or word in IGNORE['strings']:
+            return 'IGNORE'
         else:
             for token_type, re in TOKENS_RE.items():
                 if AFD(re.replace('a', ANY_BUT_QUOTES)).accepts(word, CHARACTERS):
@@ -108,9 +117,9 @@ def eval_line(entry_file_lines, line, line_index):
 
 def run():
     try:
-        entry_file = open('input/entry.w', 'r')
-    except IOError:
-        print('File not found or path is incorrect')
+        entry_file = open(entry_file_name, 'r')
+    except Exception as e:
+        print('Error: ', e)
         exit()
 
     entry_file_lines = entry_file.readlines()
@@ -152,9 +161,12 @@ def run():
         tokens_flow_file = open('output/tokens-flow', 'w+')
 
         for token in TOKENS:
+            if token.type == 'IGNORE':
+                continue
             if token.type == 'KEYWORD':
                 if token.value == '\\n':
-                    tokens_flow_file.write('\n')
+                    continue
+                    # tokens_flow_file.write('\n')
                 else:
                     tokens_flow_file.write(f'{token.value}')
             elif token.type == 'space':
@@ -178,3 +190,27 @@ try:
     run()
 except Exception as e:
     Log.FAIL('There is an error: ', e)
+
+# Generate tokens file
+instruction = []
+for token in TOKENS:
+    if token.type == 'IGNORE':
+        continue
+    if token.type == 'KEYWORD':
+        if token.value == '\\n':
+            continue
+        else:
+            instruction.append({
+                'type': token.type,
+                'value': token.value,
+            })
+    elif token.type == 'space':
+        continue
+    else:
+        instruction.append({
+            'type': token.type,
+            'value': token.value,
+        })
+
+with open('instruction.json', 'w', encoding='utf-8') as file:
+    json.dump(instruction, file, ensure_ascii = False, indent = 4)

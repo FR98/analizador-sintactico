@@ -6,10 +6,47 @@
 
 # Lexical and Sintax Analyzer for Coco/L Compiler Definition
 
+"""
+Cocol = "COMPILER" ident
+    ScannerSpecification
+    ParserSpecification
+"END" ident '.'.
+
+ScannerSpecification =
+["CHARACTERS" { SetDecl }]
+["KEYWORDS" { KeywordDecl }]
+["TOKENS" { TokenDecl }]
+{ WhiteSpaceDecl }.
+
+SetDecl     = ident '=' Set.
+Set         = BasicSet { ('+'|'-') BasicSet }.
+BasicSet    = string | ident | Char [".." Char].
+Char        = char | "CHR" '(' number ')'.
+
+KeywordDecl = ident '=' string '.'
+
+TokenDecl   = ident ['=' TokenExpr ] ["EXCEPT KEYWORDS"] '.'.
+TokenExpr   = TokenTerm {'|' TokenTerm }.
+TokenTerm   = TokenFactor {TokenFactor}
+TokenFactor = Symbol | '(' TokenExpr ')' | '[' TokenExpr ']' | '{' TokenExpr '}'.
+Symbol      = ident | string | char
+
+WhiteSpaceDecl = "IGNORE" Set
+
+ParserSpecification = "PRODUCTIONS" {Production}.
+Production = ident [Attributes] [SemAction] '=' Expression '.'.
+Expression = Term { '|' Term }.
+Term = Factor { Factor }
+Factor = Symbol [Attributes] | '(' Expression ')' | '[' Expression ']' | '{' Expression '}' | SemAction.
+Attributes = "<." {ANY} ".>"
+SemAction = "(." {ANY} ".)"
+"""
+
 from afd import AFD
 from log import Log
 
-ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»'
+# ANY_BUT_QUOTES = '«««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»'
+ANY_BUT_QUOTES = '«««««««««««««««««l¦d»¦s»¦o»¦ »¦(»¦)»¦/»¦*»¦=»¦.»¦|»¦[»¦]»¦{»¦}»¦<»¦>»'
 
 # CHARACTERS
 CHARACTERS = {
@@ -21,6 +58,8 @@ CHARACTERS = {
     '=': '=',
     '.': '.',
     '|': '|',
+    '<': '<',
+    '>': '>',
     '(': '(',
     ')': ')',
     '[': '[',
@@ -28,7 +67,7 @@ CHARACTERS = {
     '{': '{',
     '}': '}',
     'o': '+-',
-    's': '@~!#$%^&_;:,<>?',
+    's': '@~!#$%^&_;:,?',
     'l': 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
     'd': '0123456789',
 }
@@ -61,6 +100,7 @@ KEYWORDS = {
 # TOKENS RE
 TOKENS_RE = {
     'semantic_action': '«(.««a¦"»¦\'»±.»)',
+    'attrs': '«<.««a¦"»¦\'»±.»>',
     'comment_block': '«/*««a¦"»¦\'»±*»/',
     'comment': '//««««l¦d»¦s»¦o»¦ »±',
     'char': '«\'«a¦"»±»\'',
@@ -113,6 +153,10 @@ PRODUCTIONS = {
             'type': 'PRODUCTION',
             'value': 'TOKENS_SET',
             'optional': True,
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'WhiteSpaceDecl',
+            'optional': True,
         }
     ],
     'CHARACTERS_SET': [
@@ -144,6 +188,17 @@ PRODUCTIONS = {
             'type': 'PRODUCTION',
             'value': 'TokenDecl',
             'ocurrences': '+',
+        }
+    ],
+    'WhiteSpaceDecl': [
+        {
+            'type': 'string',
+            'match': 'IGNORE',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'Set',
+        }, {
+            'type': 'final',
         }
     ],
     'SetDecl': [
@@ -346,20 +401,146 @@ PRODUCTIONS = {
         {
             'type': 'KEYWORD',
             'value': 'PRODUCTIONS',
-        # }, {
-        #     'type': 'PRODUCTION',
-        #     'value': 'ProdDecl',
-        #     'ocurrences': '+',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdDecl',
+            'ocurrences': '+',
+        }
+    ],
+    'ProdDecl': [
+        {
+            'type': 'ident',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdAttributes',
+            'ocurrences': 'opt',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdSemAction',
+            'ocurrences': 'opt',
+        }, {
+            'type': 'assign',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'final',
+        }
+    ],
+    'ProdAttributes': [
+        {
+            'type': 'string',
+            'match': '<.',
+        }, {
+            'type': 'ANY',
+        }, {
+            'type': 'string',
+            'match': '.>',
+        }
+    ],
+    'ProdSemAction': [
+        {
+            'type': 'string',
+            'match': '(.',
+        }, {
+            'type': 'ANY',
+        }, {
+            'type': 'string',
+            'match': '.)',
+        }
+    ],
+    'ProdExpr': [
+        {
+            'type': 'PRODUCTION',
+            'value': 'ProdTerm',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExprConvination',
+            'ocurrences': '+',
+        }
+    ],
+    'ProdExprConvination': [
+        {
+            'type': 'or',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdTerm',
+        }
+    ],
+    'ProdTerm': [
+        {
+            'type': 'PRODUCTION',
+            'value': 'ProdFactor',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdFactor',
+            'ocurrences': '+',
+        }
+    ],
+    'ProdFactor': [
+        {
+            'type': 'OPTIONS',
+            'options': [
+                {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdSymAttrs',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdExprGroup',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdExprOption',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdExprIteration',
+                }, {
+                    'type': 'PRODUCTION',
+                    'value': 'ProdSemAction',
+                }
+            ]
+        }
+    ],
+    'ProdSymAttrs': [
+        {
+            'type': 'PRODUCTION',
+            'value': 'Symbol',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdAttributes',
+            'ocurrences': 'opt',
+        }
+    ],
+    'ProdExprGroup': [
+        {
+            'type': 'group',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'group',
+        }
+    ],
+    'ProdExprOption': [
+        {
+            'type': 'option',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'option',
+        }
+    ],
+    'ProdExprIteration': [
+        {
+            'type': 'iteration',
+        }, {
+            'type': 'PRODUCTION',
+            'value': 'ProdExpr',
+        }, {
+            'type': 'iteration',
         }
     ],
 }
-# ParserSpecification = "PRODUCTIONS" {Production}.
-# Production = ident [Attributes] [SemAction] '=' Expression '.'.
-# Expression = Term{'|'Term}.
-# Term = Factor {Factor}
-# Factor = Symbol [Attributes] | '(' Expression ')' | '[' Expression ']' | '{' Expression '}' | SemAction.
-# Attributes = "<." {ANY} ".>"
-# SemAction = "(." {ANY} ".)"
 
 # -------------------------------------------------------
 
@@ -383,10 +564,60 @@ class Token():
                     return token_type
         return 'ERROR'
 
+    def set_type(self, type):
+        self.type = type
+        return self
 
 class CompilerDef():
     def __init__(self, file_lines):
-        self.file_lines = file_lines
+        # self.file_lines = file_lines
+        self.file_lines = []
+
+        production_section = ''
+        in_production_section = False
+        for line in file_lines:
+            clean_line = line
+
+            if 'PRODUCTIONS' in clean_line:
+                in_production_section = True
+
+            if in_production_section:
+                production_section += clean_line
+
+        cont = 0
+        special_chars = []
+        while cont < len(production_section):
+            if production_section[cont] == '"':
+                next_char = production_section[cont + 1]
+                next_char_2 = production_section[cont + 2]
+
+                if next_char_2 == '"':
+                    special_chars.append(next_char)
+            cont += 1
+
+        for line in file_lines:
+            clean_line = line
+
+            if '//' in clean_line:
+                clean_line = clean_line[:clean_line.index('//')]
+
+            self.file_lines.append(clean_line.replace('\t', ' ' * 4))
+
+            if 'TOKENS' in clean_line:
+                for special_char in special_chars:
+                    if special_char == '*':
+                        self.file_lines.append(f'por = "{special_char}".')
+                    elif special_char == '/':
+                        self.file_lines.append(f'div = "{special_char}".')
+                    elif special_char == ';':
+                        self.file_lines.append(f'f = "{special_char}".')
+                    elif special_char == '&':
+                        self.file_lines.append(f'and = "{special_char}".')
+                    elif special_char == '|':
+                        self.file_lines.append(f'or = "{special_char}".')
+                    else:
+                        self.file_lines.append(f'{special_char} = "{special_char}".')
+
         self.lexical_errors = False
         self.sintax_errors = False
         self.tokens = []
@@ -395,6 +626,7 @@ class CompilerDef():
         self.CHARACTERS = {}
         self.KEYWORDS = {}
         self.TOKENS_RE = {}
+        self.WHITE_SPACE_DECL = {}
         self.PRODUCTIONS = {}
         self.symbols = {}
         self.current_token_index = 0
@@ -403,8 +635,9 @@ class CompilerDef():
         self.has_lexical_errors()
 
         self.clean_tokens()
-        self.check_sintax()
-        self.has_sintax_errors()
+        # TODO
+        # self.check_sintax()
+        # self.has_sintax_errors()
 
         self.get_definitions()
         self.has_sintax_errors()
@@ -454,7 +687,11 @@ class CompilerDef():
 
                 # Se evalua el token actual
                 if line_position + avance <= len(line):
-                    current_token = Token(line[line_position:line_position + avance], line_index, line_position)
+                    if line[line_position:line_position + avance + 1] in ['(.', '<.']:
+                        current_token = Token(line[line_position:line_position + avance + 1], line_index, line_position)
+                    else:
+                        # print(line[line_position:line_position + avance])
+                        current_token = Token(line[line_position:line_position + avance], line_index, line_position)
 
                 avance += 1
 
@@ -462,15 +699,8 @@ class CompilerDef():
                 if line_position + avance <= len(line):
                     next_token = Token(line[line_position:line_position + avance], line_index, line_position)
 
-                # Log.WARNING(current_token)
-                # if current_token.type == 'ERROR':
-                #     Log.WARNING(current_token)
-                # else:
-                #     Log.INFO(current_token)
-
             # Se actualiza la posicion en la linea
             line_position = line_position + avance
-
 
             if current_token and current_token.type != 'ERROR':
                 # Si el token es valido se guarda en los tokens reconocidos de la linea actual
@@ -508,6 +738,8 @@ class CompilerDef():
             Log.WARNING('\nPlease fix errors before continuing')
             exit()
 
+        Log.OKBLUE('\n\nFinish lexical errors')
+
     def clean_tokens(self):
         # for token in self.tokens:
         token_index = 0
@@ -523,9 +755,13 @@ class CompilerDef():
                 continue
             else:
                 self.tokens_clean.append(token)
-        
+
+        Log.OKGREEN('\n\nTokens found:')
         for token in self.tokens_clean:
-            Log.INFO(token)
+            if token.type == 'ERROR':
+                Log.WARNING(token)
+            else:
+                Log.INFO(token)
 
     def get_definitions(self):
         # Gramaticas libres de contexto - Analisis Sintactico
@@ -537,6 +773,11 @@ class CompilerDef():
         }
 
         self.TOKENS_RE = {}
+
+        self.WHITE_SPACE_DECL = {
+            'char_numbers': [],
+            'strings': [],
+        }
 
         # --------------------------------------------------
 
@@ -578,7 +819,8 @@ class CompilerDef():
                         for token in definition_tokens[2::]:
                             if token.type == 'ident':
                                 if token.value == 'CHR':
-                                    value += chr(int(definition_tokens[definition_tokens.index(token) + 2].value))
+                                    if int(definition_tokens[definition_tokens.index(token) + 2].value) not in [10, 13]:
+                                        value += chr(int(definition_tokens[definition_tokens.index(token) + 2].value))
                                 else:
                                     value += self.CHARACTERS[token.value]
                             elif token.type == 'string':
@@ -628,7 +870,7 @@ class CompilerDef():
                             token_re_definition_tokens.append(temp_token)
                         count += 1
 
-                        if temp_token.value in ['TOKENS', 'PRODUCTIONS', 'END']:
+                        if temp_token.value in ['TOKENS', 'IGNORE', 'PRODUCTIONS', 'END']:
                             token_index -= count
                             break
                     token_index += count
@@ -645,6 +887,69 @@ class CompilerDef():
                                 value.append(token)
 
                         self.TOKENS_RE[definition_tokens[0].value] = value
+
+                elif token.value == 'IGNORE':
+                    count = 0
+                    white_space_decl_definition_tokens = []
+                    while True:
+                        temp_token = self.tokens_clean[token_index + count + 1]
+
+                        if temp_token.type == 'final':
+                            break
+                        else:
+                            white_space_decl_definition_tokens.append(temp_token)
+                        count += 1
+
+                        if temp_token.value in ['IGNORE', 'PRODUCTIONS', 'END']:
+                            token_index -= count
+                            break
+                    token_index += count
+
+                    for token in white_space_decl_definition_tokens:
+                        if token.value == '+':
+                            continue
+                        if token.type == 'ident':
+                            if token.value == 'CHR':
+                                if int(white_space_decl_definition_tokens[white_space_decl_definition_tokens.index(token) + 2].value) not in [10, 13]:
+                                    self.WHITE_SPACE_DECL['char_numbers'].append(int(white_space_decl_definition_tokens[white_space_decl_definition_tokens.index(token) + 2].value))
+                            else:
+                                self.WHITE_SPACE_DECL['strings'].append(self.CHARACTERS[token.value])
+                        elif token.type == 'string':
+                            self.WHITE_SPACE_DECL['strings'].append(token.value.replace('"', ''))
+
+                elif token.value == 'PRODUCTIONS' and self.tokens_clean[token_index + 1].type != 'final':
+                    count = 0
+                    production_definition_tokens = []
+                    production_section_definitions = []
+                    while True:
+                        temp_token = self.tokens_clean[token_index + count + 1]
+
+                        if temp_token.type == 'final':
+                            production_section_definitions.append(production_definition_tokens)
+                            production_definition_tokens = []
+                        else:
+                            production_definition_tokens.append(temp_token)
+                        count += 1
+
+                        if temp_token.value in ['PRODUCTIONS', 'END']:
+                            token_index -= count
+                            break
+                    token_index += count
+
+                    for definition_tokens in production_section_definitions:
+                        expr = []
+                        for token in definition_tokens[2::]:
+                            # print(f'{token.type}')
+                            if token.type == 'ident':
+                                if token.value not in ['EXCEPT', 'KEYWORDS']:
+                                    expr.append(token)
+                            elif token.type == 'string':
+                                expr.append(token)
+                            elif token.type in ['iteration', 'option', 'group', 'or']:
+                                expr.append(token)
+
+                        self.PRODUCTIONS[definition_tokens[0].value] = expr
+
             token_index += 1
 
         self.CHARACTERS = self.parse_CHARACTERS(self.CHARACTERS)
@@ -652,6 +957,8 @@ class CompilerDef():
 
         self.TOKENS_RE = self.parse_TOKENS_RE(self.TOKENS_RE)
         self.TOKENS_RE['space'] = ' '
+
+        self.PRODUCTIONS = self.parse_PRODUCTIONS(self.PRODUCTIONS)
 
     def check_sintax(self):
         # Analizar flujo de tokens
@@ -783,11 +1090,44 @@ class CompilerDef():
                                 self.CHARACTERS[o] = token.value.replace('"', '')
                                 break
                         # value += token.value
-                        print(token)
 
             TOKENS_RE[key] = self.changeExp(value)
 
         return TOKENS_RE
+
+    def parse_PRODUCTIONS(self, PRODUCTIONS):
+        options = ['b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+
+        for key, val in PRODUCTIONS.items():
+            value = ''
+            for token in val:
+                # value += token.value
+                if token.value in self.symbols:
+                    value += self.symbols[token.value]
+                else:
+                    if token.type in ['iteration', 'option', 'group', 'or']:
+                        value += token.value
+                    else:
+                        # TODO: Add support for strings
+                        for o in options:
+                            if o not in list(self.symbols.values()):
+                                self.symbols[token.value] = o
+                                value += o
+                                self.CHARACTERS[o] = token.value.replace('"', '')
+                                break
+                        # value += token.value
+
+            PRODUCTIONS[key] = self.changeExp(value)
+
+
+        PRODUCTIONS_PARSED = {}
+        for key, production in PRODUCTIONS.items():
+            variants = self.get_production_variants(production)
+
+            for variant in variants:
+                PRODUCTIONS_PARSED[f'{key}{variants.index(variant)}'] = variant
+
+        return PRODUCTIONS_PARSED
 
     def changeExp(self, re):
         cont = 0
@@ -811,8 +1151,77 @@ class CompilerDef():
 
         return re
 
+    def get_production_variants(self, production):
+        exprs = []
+
+        if '¦' in production or '[' in production:
+
+            if '¦' in production:
+                or_position = production.index('¦')
+
+                open = None
+                for i in production[::-1][or_position+1:]:
+                    if i in ['(', '«']:
+                        open = i
+                        break
+
+                close = None
+                for i in production[or_position+1:]:
+                    if i in [')', '»']:
+                        close = i
+                        break
+
+                or_l_option = production[production.index(open) + 1:or_position]
+                or_r_option = production[or_position + 1:production.index(close)]
+
+                if '[' not in production:
+                    exprs.append(production.replace(or_l_option, '').replace('¦', '').replace('(', '').replace(')', ''))
+                    exprs.append(production.replace(or_r_option, '').replace('¦', '').replace('(', '').replace(')', ''))
+                else:
+                    variant1 = production.replace(or_l_option, '').replace('¦', '').replace('(', '').replace(')', '')
+                    variant2 = production.replace(or_r_option, '').replace('¦', '').replace('(', '').replace(')', '')
+
+                    option1 = variant1[variant1.index('['):variant1.index(']')+1]
+                    exprs.append(variant1.replace(option1, ''))
+                    exprs.append(variant1.replace(option1, option1.replace('[', '').replace(']', '')))
+
+                    option2 = variant2[variant2.index('['):variant2.index(']')+1]
+                    exprs.append(variant2.replace(option2, ''))
+                    exprs.append(variant2.replace(option2, option2.replace('[', '').replace(']', '')))
+
+            elif '[' in production:
+                option = production[production.index('['):production.index(']')+1]
+                exprs.append(production.replace(option, ''))
+                exprs.append(production.replace(option, option.replace('[', '').replace(']', '')))
+
+        else:
+            exprs.append(production)
+
+        return exprs
+
     def has_sintax_errors(self):
         if self.sintax_errors:
             Log.FAIL('\nSintax errors found on compiler definition file')
             Log.WARNING('\nPlease fix errors before continuing')
             exit()
+
+    def get_production_tokens(self):
+        production_tokens = []
+
+        in_production_tokens = False
+        for token in self.tokens_clean:
+            if token.value == 'PRODUCTIONS':
+                in_production_tokens = True
+                continue
+            elif token.value == 'END':
+                in_production_tokens = False
+                continue
+
+            if in_production_tokens:
+                if token.type == 'ident' and self.TOKENS_RE.get(token.value):
+                    production_tokens.append(token.set_type('token'))
+                    continue
+
+                production_tokens.append(token)
+
+        return production_tokens

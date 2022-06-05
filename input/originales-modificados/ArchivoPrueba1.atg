@@ -1,0 +1,49 @@
+COMPILER ArchivoPrueba1
+
+CHARACTERS
+/*
+letra = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".
+*/
+digito = "0123456789".
+
+TOKENS
+
+numero = digito{digito}.
+
+IGNORE CHR(9) + CHR(10) + CHR(13) + CHR(20). // tabulador, salto de línea, retorno de carro y espacio en blanco
+
+PRODUCTIONS
+
+EstadoInicial = {Instruccion ";"}.
+
+Instruccion =									(. resultado = 0 .)
+	Expresion <.ref resultado.>					(. print(resultado) .)
+	.
+
+Expresion <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
+	Termino <.ref resultado1.>
+	{		"+" Termino <.ref resultado2.>		(. resultado1 += resultado2 .)
+												(. print("Termino: ", resultado1) .)
+		  | "-" Termino <.ref resultado2.>		(. resultado1 -= resultado2 .)
+	}											(. return resultado1 .)
+	.
+
+Termino <.ref resultado.> =					(. resultado1, resultado2 = 0, 0 .)
+	Factor <.ref resultado1.>
+	{		"*" Factor <.ref resultado2.>			(. resultado1 *= resultado2 .)
+		  | "/" Factor <.ref resultado2.>			(. resultado1 /= resultado2 .)
+	}											(. return resultado1 .)
+	.
+
+Factor <.ref resultado.> =					(.signo = 1.)
+	[		"-"									(.signo = -1.) 
+	]
+	( 		Number <.ref resultado.>
+		  | "(" Expresion <. ref resultado.> ")"
+	)											(. return resultado * signo .)
+	.
+
+Number <.ref resultado.> = numero				(. return numero .)
+.
+
+END ArchivoPrueba1.

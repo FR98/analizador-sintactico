@@ -50,7 +50,7 @@ class AFD:
 
         # Extraigo letras de la expresion
         for hoja in self.tree.leaves:
-            if regex.match(r'[a-zA-Z"\'/*=.|()[\]{} ]', self.data[str(hoja.value)].val) and self.data[str(hoja.value)].val not in self.alfabeto:
+            if regex.match(r'[a-zA-Z"\'/*=.|()[\]{}<> ]', self.data[str(hoja.value)].val) and self.data[str(hoja.value)].val not in self.alfabeto:
                 self.alfabeto.append(self.data[str(hoja.value)].val)
 
         self.alfabeto.sort()
