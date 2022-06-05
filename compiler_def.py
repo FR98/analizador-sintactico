@@ -588,6 +588,7 @@ class CompilerDef():
         special_chars = []
         word = ''
         in_word = False
+        in_semantic_action = False
         while cont < len(production_section):
             if in_word:
                 if production_section[cont] == '"':
@@ -599,7 +600,13 @@ class CompilerDef():
                 else:
                     word += production_section[cont]
 
-            if production_section[cont] == '"':
+            if production_section[cont:cont + 2] == '(.':
+                in_semantic_action = True
+
+            if production_section[cont:cont + 2] == '.)':
+                in_semantic_action = False
+
+            if production_section[cont] == '"' and not in_semantic_action:
                 in_word = True
             cont += 1
 
