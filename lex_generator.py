@@ -132,13 +132,13 @@ class AnalyzerGenerator:
             if nonTerminal not in self.noTerminales:
                 self.noTerminales.append(nonTerminal)
 
-    def funcion_primero(self, produccion, primeros = []):
-        if produccion not in self.noTerminalesNumber:
-            if produccion not in primeros:
-                primeros.append(produccion)
+    def funcion_primero(self, produccion_key, primeros = []):
+        if produccion_key not in self.noTerminalesNumber:
+            if produccion_key not in primeros:
+                primeros.append(produccion_key)
         else:
             for k, prod in self.compiler_def.PRODUCTIONS.items():
-                string_production = self.compiler_def.PRODUCTIONS[produccion].replace('«', '').replace('»', '').replace('±', '')
+                string_production = self.compiler_def.PRODUCTIONS[produccion_key].replace('«', '').replace('»', '').replace('±', '')
                 if self.compiler_def.CHARACTERS[string_production[0]] in k:
                     self.funcion_primero(k, primeros)
                 elif self.compiler_def.CHARACTERS[string_production[0]] not in self.noTerminales:
@@ -155,8 +155,7 @@ class AnalyzerGenerator:
         on_if = False
         current_def = None
         for token in production_tokens:
-            Log.FAIL(f'{token.type} \t\t {token.value}')
-
+            # Log.FAIL(f'{token.type} \t\t {token.value}')
             if starting_production:
                 next_token = production_tokens[production_tokens.index(token) + 1]
                 tabs = 1
@@ -172,7 +171,9 @@ class AnalyzerGenerator:
 
             if token.type == 'iteration':
                 if current_def == 'EstadoInicial':
-                    while_condition = f"self.current_token['type'] in {self.primeros_terminales}" # ['numero', 'menos', '(']
+                    parser_file_lines.append(f"\t\tif self.current_token_index == 0 and self.current_token['type'] not in {self.primeros_terminales}:\n")
+                    parser_file_lines.append(f"\t\t\tprint('Error sintactico')\n")
+                    while_condition = f"self.current_token['type'] in {self.primeros_terminales}"
                 else:
                     strings_in_iteration = []
                     for t in production_tokens[production_tokens.index(token) + 1:]:
@@ -241,7 +242,7 @@ class AnalyzerGenerator:
                 tabs = 0
                 on_if = False
                 parser_file_lines.append('\n')
-                Log.INFO('Fin de produccion.\n')
+                # Log.INFO('Fin de produccion.\n')
                 starting_production = True
             else:
                 starting_production = False
@@ -279,7 +280,10 @@ class AnalyzerGenerator:
                 instruction_json = json.load(file)
 
             class_init = [
-                f'Parser({instruction_json})\n',
+                'try:',
+                f'\tParser({instruction_json})\n',
+                'except:',
+                '\tprint("Error sintactico")',
             ]
 
             with open('parser.py', 'w') as file:
