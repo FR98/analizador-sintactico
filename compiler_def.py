@@ -586,13 +586,21 @@ class CompilerDef():
 
         cont = 0
         special_chars = []
+        word = ''
+        in_word = False
         while cont < len(production_section):
-            if production_section[cont] == '"':
-                next_char = production_section[cont + 1]
-                next_char_2 = production_section[cont + 2]
+            if in_word:
+                if production_section[cont] == '"':
+                    in_word = False
+                    special_chars.append(word)
+                    word = ''
+                    cont += 1
+                    continue
+                else:
+                    word += production_section[cont]
 
-                if next_char_2 == '"':
-                    special_chars.append(next_char)
+            if production_section[cont] == '"':
+                in_word = True
             cont += 1
 
         for line in file_lines:
