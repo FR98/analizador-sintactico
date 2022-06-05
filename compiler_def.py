@@ -626,6 +626,8 @@ class CompilerDef():
                         self.file_lines.append(f'div = "{special_char}".')
                     elif special_char == ';':
                         self.file_lines.append(f'f = "{special_char}".')
+                    elif special_char == '.':
+                        self.file_lines.append(f'f = "{special_char}".')
                     elif special_char == '&':
                         self.file_lines.append(f'and = "{special_char}".')
                     elif special_char == '|':

@@ -297,6 +297,11 @@ class AnalyzerGenerator:
             Log.N('\n\n\n\n\n# -------------------------------------------------------')
             Log.N('\nRunning parser...')
             os.system(f'python3 parser.py')
+            # try:
+            #     from parser import Parser
+            #     Parser(instruction_json)
+            # except:
+            #     Log.ERROR('Error sintactico')
 
             Log.INFO('Parser finished successfully.\n')
         except:
